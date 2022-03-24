@@ -86,4 +86,5 @@ class OrchideaSOLDataset:
                              self.track_list[track_id]['instrument'],
                              self.track_list[track_id]['playing_style'],
                              self.track_list[track_id]['name'])
-        return read(path_track)
+        fs, x = read(path_track)
+        return fs, np.float32(x)
