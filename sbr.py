@@ -42,8 +42,10 @@ def sbr(spectrum_WB, phase_reconstruction, energy_matching_size = 0.25, n_peaks 
         for peak in highest_peak_indexes:
             harmonics_UB[peak] = np.abs(spectrum_WB[nBands//2:])[peak]
 
-        # we add the replicated spectrum and the harmonics
-        mag_spectrum_UB = mag_spectrum_UB + harmonics_UB
+        # we replace the harmonics in the the replicated spectrum
+        for freq in range(len(mag_spectrum_UB)):
+            if harmonics_UB[freq] != 0:
+                mag_spectrum_UB[freq] = harmonics_UB[freq]
 
     # we recontruct the complex spectrum
     reconstructed_mag_spectrum_WB = np.concatenate((mag_spectrum_LB, mag_spectrum_UB))
