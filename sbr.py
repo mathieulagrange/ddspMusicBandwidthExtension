@@ -2,7 +2,6 @@ import numpy as np
 import librosa as lr
 import peakutils
 
-
 def sbr(spectrum_WB, phase_reconstruction, energy_matching_size = 0.25, n_peaks = 10):
     '''Spectral Band Replication algorithm
     '''

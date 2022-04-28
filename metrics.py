@@ -3,8 +3,8 @@ import librosa as lr
 
 epsilon = 10e-6
 
-def snr(ref, est):
-    '''Calculate the signal-to-noise ratio between a reference signal and its estimation
+def sdr(ref, est):
+    '''Calculate the signal-to-distortion ratio between a reference signal and its estimation
     '''
     ref_energy = np.sum(np.square(ref))
     dist_energy = np.sum(np.square(ref-est))
@@ -13,7 +13,6 @@ def snr(ref, est):
         return 10*np.log10(ref_energy/dist_energy)
     else:
         return np.inf
-
 
 def lsd(ref, est, n_fft=1024, hop_length=512):
     '''Calculate the log-spectral distance between a reference signal and its estimation
