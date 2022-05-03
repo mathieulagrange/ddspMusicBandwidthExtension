@@ -8,3 +8,6 @@ def orchideaSOL():
 
 def medleySolosDB():
     return os.path.join(dataset(),'medley-solos-DB')
+
+def results():
+    return os.path.join(os.getcwd(),'results/')
