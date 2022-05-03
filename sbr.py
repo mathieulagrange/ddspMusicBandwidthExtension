@@ -2,7 +2,7 @@ import numpy as np
 import librosa as lr
 import peakutils
 
-def sbr(spectrum_WB, phase_reconstruction, energy_matching_size = 0.25, n_peaks = 10):
+def sbr(spectrum_WB, phase_reconstruction = "oracle", energy_matching_size = 0.25, harmonic_duplication = True, n_peaks = 10):
     '''Spectral Band Replication algorithm
     '''
 
@@ -34,12 +34,13 @@ def sbr(spectrum_WB, phase_reconstruction, energy_matching_size = 0.25, n_peaks 
         phase_spectrum_UB = 2*np.pi*np.random.rand(nBands//2)
     
     # harmonic peaks extraction from ground-truth and replication
-    harmonics_UB = np.zeros((mag_spectrum_LB.size))
-    indexes = peakutils.indexes(np.abs(spectrum_WB[nBands//2:]))
-    if indexes != []:
-        highest_peak_indexes = indexes[np.argsort(np.abs(spectrum_WB[nBands//2:])[indexes][::-1])[:n_peaks]]
-        for peak in highest_peak_indexes:
-            harmonics_UB[peak] = np.abs(spectrum_WB[nBands//2:])[peak]
+    if harmonic_duplication:
+        harmonics_UB = np.zeros((mag_spectrum_LB.size))
+        indexes = peakutils.indexes(np.abs(spectrum_WB[nBands//2:]))
+        if indexes != []:
+            highest_peak_indexes = indexes[np.argsort(np.abs(spectrum_WB[nBands//2:])[indexes][::-1])[:n_peaks]]
+            for peak in highest_peak_indexes:
+                harmonics_UB[peak] = np.abs(spectrum_WB[nBands//2:])[peak]
 
         # we replace the harmonics in the the replicated spectrum
         for freq in range(len(mag_spectrum_UB)):
