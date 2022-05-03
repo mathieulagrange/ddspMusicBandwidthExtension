@@ -3,6 +3,8 @@ from metrics import sdr, lsd
 import doce
 import sys
 from evaluate import evaluate
+import customPath
+import os
 
 def set (args):
     # experiment definition
@@ -13,15 +15,16 @@ def set (args):
     )
 
     # experiment path
-    experiment.setPath('output', '/home/user/Documents/Python/modibe/'+experiment.name+'/')
+    experiment.setPath('output', os.path.join(customPath.results(),experiment.name))
 
     # experiment plan
     experiment.addPlan('plan',
         alg = ['sbr'],
-        data = ['orchideaSOL'],
+        data = ['orchideaSol'],#, 'medleySolosDB'],
         method = ['replication'],
-        phase = ['oracle', 'flipped', 'random'],
-        matchingEnergy = [0.25, 0.5, 1.0]
+        phase = ['oracle', 'flipped', 'noise'],
+        matchingEnergy = [0.25, 0.5, 1.0],
+        nfft = [512]
         )
 
     # experiment metrics
@@ -35,11 +38,11 @@ def set (args):
 # processing for each step in the plan 
 def step(setting, experiment):
     # use the evaluate function with the given settings
-    sdr, lsd = evaluate(setting)
+    sdr, lsd = evaluate(setting, experiment)
 
     # store the resulting metrics for a whole dataset
-    np.save(experiment.path.output+setting.id()+'sdr.npy', sdr)
-    np.save(experiment.path.output+setting.id()+'lsd.npy', lsd)
+    np.save(os.path.join(customPath.results(),experiment.name,setting.id()+'_sdr.npy'), sdr)
+    np.save(os.path.join(customPath.results(),experiment.name,setting.id()+'_lsd.npy'), lsd)
 
 if __name__ == "__main__":
   doce.cli.main()
