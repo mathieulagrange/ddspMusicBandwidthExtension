@@ -15,22 +15,24 @@ def set (args):
     )
 
     # experiment path
-    experiment.setPath('output', os.path.join(customPath.results(),experiment.name))
+    experiment.setPath('output', os.path.join(customPath.results(),experiment.name, ''))
 
     # experiment plan
     experiment.addPlan('plan',
         alg = ['sbr'],
-        data = ['orchideaSol'],#, 'medleySolosDB'],
+        data = ['orchideaSol', 'medleySolosDB', 'gtzan'],
+        # data = ['medleySolosDB', 'gtzan'],
+        # data = ['gtzan'],
         method = ['replication'],
         phase = ['oracle', 'flipped', 'noise'],
         matchingEnergy = [0.25, 0.5, 1.0],
-        nfft = [512]
+        nfft = [512, 1024]
         )
 
     # experiment metrics
     experiment.setMetrics(
-        sdr = ['+'],
-        lsd = ['-']
+        sdr = ['mean+'],
+        lsd = ['mean-']
     )
 
     return experiment
@@ -41,8 +43,8 @@ def step(setting, experiment):
     sdr, lsd = evaluate(setting, experiment)
 
     # store the resulting metrics for a whole dataset
-    np.save(os.path.join(customPath.results(),experiment.name,setting.id()+'_sdr.npy'), sdr)
-    np.save(os.path.join(customPath.results(),experiment.name,setting.id()+'_lsd.npy'), lsd)
+    np.save(os.path.join(experiment.path.output,setting.id()+'_sdr.npy'), sdr)
+    np.save(os.path.join(experiment.path.output,setting.id()+'_lsd.npy'), lsd)
 
 if __name__ == "__main__":
   doce.cli.main()
