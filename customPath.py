@@ -9,5 +9,8 @@ def orchideaSOL():
 def medleySolosDB():
     return os.path.join(dataset(),'medley-solos-DB')
 
+def gtzan():
+    return os.path.join(dataset(), 'gtzan')
+
 def results():
-    return os.path.join(os.getcwd(),'results/')
+    return os.path.join(os.getcwd(),'results', '')
