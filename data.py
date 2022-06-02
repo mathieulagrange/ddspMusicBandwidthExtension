@@ -1,4 +1,3 @@
-import re
 import numpy as np
 import tensorflow as tf
 from ddsp.training.data import DataProvider
@@ -7,7 +6,10 @@ import os
 import csv
 from scipy.io.wavfile import read
 import pandas as pd
+from tqdm import tqdm
+import utils
 
+### Generic dataset ###
 class GenericDataset(DataProvider):
     def __init__(self, audio_length=4, sample_rate=16000, frame_rate=250, batch_size=1):
         super().__init__(sample_rate, frame_rate)
@@ -21,7 +23,6 @@ class GenericDataset(DataProvider):
             {'audio': tf.io.FixedLenFeature([], dtype=tf.string),
             'filename': tf.io.FixedLenFeature([], dtype=tf.string),
             'chunk': tf.io.FixedLenFeature([], dtype=tf.int64),
-            'instrument': tf.io.FixedLenFeature([], dtype=tf.string),
             'f0_hz': tf.io.FixedLenFeature([], dtype=tf.string),
             'loudness_db': tf.io.FixedLenFeature([], dtype=tf.string)}
         )
@@ -29,7 +30,6 @@ class GenericDataset(DataProvider):
         audio = tf.ensure_shape(tf.io.parse_tensor(batch['audio'], out_type=tf.float64), shape=(int(self.audio_length*self.sample_rate)))
         filename = batch['filename']
         chunk = batch['chunk']
-        instrument = batch['instrument']
         f0_hz = tf.ensure_shape(tf.io.parse_tensor(batch['f0_hz'], out_type=tf.float64), shape=(int(self.audio_length*self.frame_rate)))
         loudness_db = tf.ensure_shape(tf.io.parse_tensor(batch['loudness_db'], out_type=tf.float64), shape=(int(self.audio_length*self.frame_rate)))
 
@@ -39,7 +39,40 @@ class GenericDataset(DataProvider):
             'loudness_db': loudness_db
         }
 
-### OrchideaSol Data Generator ###
+    def generate_tfrecord(self, path, split):
+            file_list = [f for f in os.listdir(os.path.join(path, split)) if f.endswith('.wav')]
+            with tf.io.TFRecordWriter(os.path.join(path, f'{split}.tfrecord')) as file_writer:
+                for file_name in tqdm(file_list):
+                    _, x = read(os.path.join(path, split, file_name))
+                    x = x.astype('float64')
+                    x = x/np.max(np.abs(x))
+
+                    n_chunks = x.size//(self.sample_rate*self.audio_length)
+                    n_sample_chunk = self.sample_rate*self.audio_length
+                    for i_chunk in range(n_chunks+1):
+                        x_chunk = x[i_chunk*n_sample_chunk:(i_chunk+1)*n_sample_chunk]
+                        if x_chunk.size < n_sample_chunk:
+                            x_chunk = np.concatenate((x_chunk, np.zeros((n_sample_chunk-x_chunk.size))))
+                        
+                        note, velocity = self.get_note_velocity(file_name)                       
+
+                        f0_hz = utils.midi_to_hz(utils._PITCHES_MIDI_NUMBER[utils._PITCHES.index(note)])*np.ones((self.frame_rate*self.audio_length))
+                        loudness_db = -10*np.ones((self.frame_rate*self.audio_length))
+
+                        record_bytes = tf.train.Example(features=tf.train.Features(feature={
+                            "audio": tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.io.serialize_tensor(x_chunk).numpy()])),
+                            "filename": tf.train.Feature(bytes_list=tf.train.BytesList(value=[file_name.encode()])),
+                            "chunk": tf.train.Feature(int64_list=tf.train.Int64List(value=[i_chunk])),
+                            "f0_hz": tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.io.serialize_tensor(f0_hz).numpy()])),
+                            "loudness_db": tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.io.serialize_tensor(loudness_db).numpy()])),
+                        })).SerializeToString()
+                        file_writer.write(record_bytes)
+
+    def get_note_velocity(self, filename):
+        raise NotImplementedError
+
+
+### OrchideaSol dataset ###
 class OrchideaSol(GenericDataset):
     def __init__(self, split, audio_length=4, sample_rate=16000, frame_rate=250, batch_size=1):
         super().__init__(audio_length, sample_rate, frame_rate, batch_size)
@@ -48,15 +81,22 @@ class OrchideaSol(GenericDataset):
 
     def get_dataset(self, shuffle = False):
         if not os.path.isfile(self.path):
-            generate_tfrecord(self.path)
-            
+            print(f'\n Creating TFrecord file for split {self.split} ...')
+            self.generate_tfrecord(os.path.dirname(self.path), self.split)
+            print(f'{self.path} created.\n')
+
         dataset = tf.data.TFRecordDataset(self.path).map(self.decode_tfrecord)
         if shuffle:
             return dataset.shuffle(self.batch_size)
         else:
             return dataset
+    
+    def get_note_velocity(self, filename):
+        note = filename.split('-')[2]
+        velocity = filename.split('-')[3]
+        return note, velocity
 
-### OrchideaSol_tiny Data Generator ###
+### OrchideaSol_tiny dataset ###
 class OrchideaSolTiny(GenericDataset):
     def __init__(self, split, audio_length=4, sample_rate=16000, frame_rate=250, batch_size=1):
         super().__init__(audio_length, sample_rate, frame_rate, batch_size)
@@ -64,103 +104,69 @@ class OrchideaSolTiny(GenericDataset):
         self.path = os.path.join(customPath.orchideaSOL_tiny(), f'{split}.tfrecord')
 
     def get_dataset(self, shuffle = False):
+        if not os.path.isfile(self.path):
+            print(f'\n Creating TFrecord file for split {self.split} ...')
+            self.generate_tfrecord(os.path.dirname(self.path), self.split)
+            print(f'{self.path} created.\n')
+
         dataset = tf.data.TFRecordDataset(self.path).map(self.decode_tfrecord)
         if shuffle:
             return dataset.shuffle(self.batch_size)
         else:
             return dataset
+    
+    def get_note_velocity(filename):
+        note = filename.split('-')[2]
+        velocity = filename.split('-')[3]
+        return note, velocity
 
 ### MedleySolosDB Data Generator ###
-class MedleySolosDB(DataProvider):
-    def __init__(self, split, sample_rate, frame_rate, batch_size):
-        super().__init__(sample_rate, frame_rate)
+class MedleySolosDB(GenericDataset):
+    def __init__(self, split, audio_length=4, sample_rate=16000, frame_rate=250, batch_size=1):
+        super().__init__(audio_length, sample_rate, frame_rate, batch_size)
         self.split = split
-        self.path = os.path.join(customPath.medleySolosDB(), split)
-        self.frame_length = int(self.sample_rate/self.frame_rate)
+        self.path = os.path.join(customPath.medleySolosDB(), f'{split}.tfrecord')
 
-        # scan split folder to create ids
-        # self.list_ids = []
-        # for f in os.listdir(self.path):
-        #     if f.endswith('.wav'):
-        #         _, x = read(os.path.join(self.path, f))
-        #         n_frames = int(x.size/(self.sample_rate/self.frame_rate))
-        #         for frame in range(n_frames):
-        #             self.list_ids.append((f, frame))
+    def get_dataset(self, shuffle = False):
+        if not os.path.isfile(self.path):
+            print(f'\n Creating TFrecord file for split {self.split} ...')
+            self.generate_tfrecord(os.path.dirname(self.path), self.split)
+            print(f'{self.path} created.\n')
 
-        self.list_ids = []
-        for f in os.listdir(self.path):
-            if f.endswith('.wav'):
-                self.list_ids.append(f)
+        dataset = tf.data.TFRecordDataset(self.path).map(self.decode_tfrecord)
+        if shuffle:
+            return dataset.shuffle(self.batch_size)
+        else:
+            return dataset
+    
+    def get_note_velocity(self, filename):
+        # all_metadata = pd.read_csv(os.path.join(os.path.dirname(self.path), 'medley-solos-DB_metadata.csv'))
+        # uuid4 = filename[:-4].split('_')[2]
+        # metadata = all_metadata[all_metadata['uuid4'].str.contains(uuid4)]
+        note = 'A0'
+        velocity = 'mf'
+        return note, velocity
 
-        self.batch_size = batch_size
-
-        super().__init__(sample_rate, frame_rate)
-
-    def get_length(self):
-        return len(self.list_ids)
-
-    def get_dataset(self, shuffle):
-        return tf.data.Dataset.from_generator(self.get_features,
-            output_signature = (tf.TensorSpec(shape=(None,), dtype=tf.dtypes.float32))
-            )
-
-    def get_features(self):
-        all_metadata = pd.read_csv(os.path.join(os.path.dirname(self.path), 'medley-solos-DB_metadata.csv'))
-        for audio_id in self.list_ids:
-            # retrieve the instrument from .csv file
-            uuid4 = audio_id[:-4].split('_')[2]
-            metadata = all_metadata[all_metadata['uuid4'].str.contains(uuid4)]
-            instrument = metadata['instrument'].values[0]
-
-            # load frame into wavfile
-            _, x = read(os.path.join(self.path, audio_id))
-            # frame = x[audio_id[1]*self.frame_length: (audio_id[1]+1)*self.frame_length]
-
-            # # padding if the frame at the end of the wavfile is too short
-            # if frame.size < self.frame_length:
-            #     frame = np.concatenate((frame, np.zeros((self.frame_length-frame.size))))
-
-            # yield
-            yield (x)
-
-### Gtzan Data Generator ###
-class Gtzan(DataProvider):
-    def __init__(self, split, sample_rate, frame_rate, batch_size):
-        super().__init__(sample_rate, frame_rate)
+### Gtzan dataset ###
+class Gtzan(GenericDataset):
+    def __init__(self, split, audio_length=4, sample_rate=16000, frame_rate=250, batch_size=1):
+        super().__init__(audio_length, sample_rate, frame_rate, batch_size)
         self.split = split
-        self.path = os.path.join(customPath.gtzan(), split)
-        self.frame_length = int(self.sample_rate/self.frame_rate)
+        self.path = os.path.join(customPath.orchideaSOL_tiny(), f'{split}.tfrecord')
 
-        # scan split folder to create ids
-        # self.list_ids = []
-        # for f in os.listdir(self.path):
-        #     if f.endswith('.wav'):
-        #         _, x = read(os.path.join(self.path, f))
-        #         n_frames = int(x.size/(self.sample_rate/self.frame_rate))
-        #         for frame in range(n_frames):
-        #             self.list_ids.append((f, frame))
+    def get_dataset(self, shuffle = False):
+        if not os.path.isfile(self.path):
+            print(f'\n Creating TFrecord file for split {self.split} ...')
+            self.generate_tfrecord(os.path.dirname(self.path), self.split)
+            print(f'{self.path} created.\n')
 
-        self.list_ids = []
-        for f in os.listdir(self.path):
-            if f.endswith('.wav'):
-                self.list_ids.append(f)
-
-        self.batch_size = batch_size
-
-        super().__init__(sample_rate, frame_rate)
-
-    def get_length(self):
-        return len(self.list_ids)
-
-    def get_dataset(self, shuffle):
-        return tf.data.Dataset.from_generator(self.get_features,
-            output_signature = (tf.TensorSpec(shape=(None,), dtype=tf.dtypes.float32))
-            )
-
-    def get_features(self):
-        for audio_id in self.list_ids:
-            # load wavfile
-            _, x = read(os.path.join(self.path, audio_id))
-
-            # yield
-            yield (x)
+        dataset = tf.data.TFRecordDataset(self.path).map(self.decode_tfrecord)
+        if shuffle:
+            return dataset.shuffle(self.batch_size)
+        else:
+            return dataset
+    
+    def get_note_velocity(filename):
+        note = 'A0'
+        velocity = 'mf'
+        return note, velocity
