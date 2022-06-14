@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 import numpy as np
 from metrics import sdr, lsd
 import doce
