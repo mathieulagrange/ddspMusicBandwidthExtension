@@ -19,14 +19,12 @@ def set (args):
 
     # experiment plan
     experiment.addPlan('plan',
-        alg = ['sbr'],
-        data = ['orchideaSol', 'medleySolosDB', 'gtzan'],
-        # data = ['medleySolosDB', 'gtzan'],
-        # data = ['gtzan'],
-        method = ['replication'],
+        alg = ['sbr', 'oracle'],
+        data = ['sol', 'tiny', 'medley', 'gtzan'],
+        method = ['replication', 'harmonic', 'replication+harmonic'],
         phase = ['oracle', 'flipped', 'noise'],
         matchingEnergy = [0.25, 0.5, 1.0],
-        nfft = [512, 1024]
+        nfft = [1024]
         )
 
     # experiment metrics
