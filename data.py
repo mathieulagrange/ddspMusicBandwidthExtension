@@ -115,7 +115,7 @@ class OrchideaSolTiny(GenericDataset):
         else:
             return dataset
     
-    def get_note_velocity(filename):
+    def get_note_velocity(self, filename):
         note = filename.split('-')[2]
         velocity = filename.split('-')[3]
         return note, velocity
@@ -152,7 +152,7 @@ class Gtzan(GenericDataset):
     def __init__(self, split, audio_length=4, sample_rate=16000, frame_rate=250, batch_size=1):
         super().__init__(audio_length, sample_rate, frame_rate, batch_size)
         self.split = split
-        self.path = os.path.join(customPath.orchideaSOL_tiny(), f'{split}.tfrecord')
+        self.path = os.path.join(customPath.gtzan(), f'{split}.tfrecord')
 
     def get_dataset(self, shuffle = False):
         if not os.path.isfile(self.path):
@@ -166,7 +166,7 @@ class Gtzan(GenericDataset):
         else:
             return dataset
     
-    def get_note_velocity(filename):
+    def get_note_velocity(self, filename):
         note = 'A0'
         velocity = 'mf'
         return note, velocity
