@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+sandbox.py
+bwe_viz.py
+customPath.py
