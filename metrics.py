@@ -17,10 +17,10 @@ def sdr(ref, est):
 def lsd(ref, est, n_fft=1024, hop_length=512):
     '''Calculate the log-spectral distance between a reference signal and its estimation
     '''
-    spec_ref = np.abs(lr.stft(ref, n_fft=n_fft, hop_length=hop_length).T)
-    spec_est = np.abs(lr.stft(est, n_fft=n_fft, hop_length=hop_length).T)
+    spec_ref = np.abs(ref)
+    spec_est = np.abs(est)
     log_diff = 10*(np.log10(np.square(spec_est)+epsilon)-np.log10((np.square(spec_ref)+epsilon)))
-    freq_mean = np.mean(np.square(log_diff), axis=1)
+    freq_mean = np.mean(np.square(log_diff[:, :-1]), axis=0)
     lsd = np.mean(np.sqrt(freq_mean))
 
     return lsd
