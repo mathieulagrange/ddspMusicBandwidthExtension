@@ -3,14 +3,13 @@ from data import OrchideaSol, OrchideaSolTiny, MedleySolosDB, Gtzan
 from metrics import sdr, lsd
 from sbr import sbr
 import numpy as np
-import os
-import customPath
-import warnings
+import time
 import librosa as lr
 from tqdm import tqdm
 from scipy.io.wavfile import write
 
 def evaluate(setting, experiment):
+    tic = time.time()
     # if os.path.isdir(os.path.join(customPath.results(), setting.id())):
     #     print(f'The experiment with setting {setting.id()} has already been run and the metrics has been saved in folder {os.path.join(customPath.results(), setting.id())}')
     # else:
@@ -85,4 +84,7 @@ def evaluate(setting, experiment):
         all_sdr[i] = cur_sdr
         all_lsd[i] = cur_lsd
 
-    return all_sdr, all_lsd
+        toc = time.time()
+        elapsed_time = int(toc-tic)
+
+    return all_sdr, all_lsd, elapsed_time

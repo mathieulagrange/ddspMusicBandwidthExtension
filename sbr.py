@@ -50,7 +50,7 @@ def sbr(spectrum_WB, phase_reconstruction = "oracle", replication = True, energy
                 mag_spectrum_UB[freq] = harmonics_UB[freq]
 
     # we recontruct the complex spectrum
-    reconstructed_mag_spectrum_WB = np.concatenate((mag_spectrum_LB, np.abs(spectrum_WB[nBands_LB:])))
+    reconstructed_mag_spectrum_WB = np.concatenate((mag_spectrum_LB, mag_spectrum_UB))
     reconstructed_phase_spectrum_WB = np.concatenate((phase_spectrum_LB, phase_spectrum_UB))
     reconstructed_spectrum_WB = reconstructed_mag_spectrum_WB*np.exp(1j*reconstructed_phase_spectrum_WB)
 

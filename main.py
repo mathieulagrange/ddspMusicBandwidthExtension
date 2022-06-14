@@ -32,7 +32,8 @@ def set (args):
     # experiment metrics
     experiment.set_metrics(
         sdr = ['mean+'],
-        lsd = ['mean-']
+        lsd = ['mean-'],
+        time = ['-']
     )
 
     return experiment
@@ -40,11 +41,12 @@ def set (args):
 # processing for each step in the plan 
 def step(setting, experiment):
     # use the evaluate function with the given settings
-    sdr, lsd = evaluate(setting, experiment)
+    sdr, lsd, time = evaluate(setting, experiment)
 
     # store the resulting metrics for a whole dataset
-    np.save(os.path.join(experiment.path.output,setting.id()+'_sdr.npy'), sdr)
-    np.save(os.path.join(experiment.path.output,setting.id()+'_lsd.npy'), lsd)
+    np.save(os.path.join(experiment.path.output,setting.identifier()+'_sdr.npy'), sdr)
+    np.save(os.path.join(experiment.path.output,setting.identifier()+'_lsd.npy'), lsd)
+    np.save(os.path.join(experiment.path.output,setting.identifier()+'_time.npy'), time)
 
 if __name__ == "__main__":
   doce.cli.main()
