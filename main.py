@@ -17,10 +17,10 @@ def set (args):
     )
 
     # experiment path
-    experiment.setPath('output', os.path.join(customPath.results(),experiment.name, ''))
+    experiment.set_path('output', os.path.join(customPath.results(),experiment.name, ''))
 
     # experiment plan
-    experiment.addPlan('plan',
+    experiment.add_plan('plan',
         alg = ['sbr', 'oracle'],
         data = ['sol', 'tiny', 'medley', 'gtzan'],
         method = ['replication', 'harmonic', 'replication+harmonic'],
@@ -30,7 +30,7 @@ def set (args):
         )
 
     # experiment metrics
-    experiment.setMetrics(
+    experiment.set_metrics(
         sdr = ['mean+'],
         lsd = ['mean-']
     )
