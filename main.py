@@ -8,7 +8,7 @@ from evaluate import evaluate
 import customPath
 import os
 
-def set (args):
+def set():
     # experiment definition
     experiment = doce.Experiment(
         name = 'sbr_replication',
@@ -30,10 +30,20 @@ def set (args):
         )
 
     # experiment metrics
-    experiment.set_metrics(
-        sdr = ['mean+'],
-        lsd = ['mean-'],
-        time = ['-']
+    experiment.set_metric(
+        name = 'sdr',
+        significance = True,
+        higher_the_better = True
+    )
+
+    experiment.set_metric(
+        name = 'lsd',
+        significance = True,
+        lower_the_better = True
+    )
+
+    experiment.set_metric(
+        name = 'time',
     )
 
     return experiment
