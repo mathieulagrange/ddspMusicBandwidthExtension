@@ -4,7 +4,6 @@ import numpy as np
 from metrics import sdr, lsd
 import doce
 import sys
-from evaluate import evaluate
 import customPath
 import os
 
@@ -21,12 +20,17 @@ def set():
 
     # experiment plan
     experiment.add_plan('plan',
-        alg = ['sbr', 'oracle'],
+        alg = ['sbr', 'oracle', 'dumb', 'ddsp'],
         data = ['sol', 'tiny', 'medley', 'gtzan'],
-        method = ['replication', 'harmonic', 'replication+harmonic'],
-        phase = ['oracle', 'flipped', 'noise'],
-        matchingEnergy = [0.25, 0.5, 1.0],
-        nfft = [1024]
+        # method = ['replication', 'harmonic', 'replication+harmonic'],
+        # phase = ['oracle', 'flipped', 'noise'],
+        # matchingEnergy = [0.25, 0.5, 1.0],
+        # nfft = [1024],
+        batch_size = [16],
+        model = ['original_autoencoder'],
+        n_steps_total = [1000],
+        n_steps_per_training = [100],
+        early_stop_loss_value = [None]
         )
 
     # experiment metrics
@@ -50,6 +54,7 @@ def set():
 
 # processing for each step in the plan 
 def step(setting, experiment):
+    from evaluate import evaluate
     # use the evaluate function with the given settings
     sdr, lsd, time = evaluate(setting, experiment)
 
