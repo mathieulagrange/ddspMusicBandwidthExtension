@@ -17,3 +17,6 @@ def gtzan():
 
 def results():
     return os.path.join(os.getcwd(),'results', '')
+
+def models():
+    return os.path.join(os.getcwd(),'models', '')
