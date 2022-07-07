@@ -9,13 +9,14 @@ import pandas as pd
 from tqdm import tqdm
 import utils
 
+_max_dataset_length = 100000
+
 ### Generic dataset ###
 class GenericDataset(DataProvider):
-    def __init__(self, audio_length=4, sample_rate=16000, frame_rate=250, batch_size=1):
+    def __init__(self, audio_length=4, sample_rate=16000, frame_rate=250):
         super().__init__(sample_rate, frame_rate)
         self.frame_length = int(self.sample_rate/self.frame_rate)
         self.audio_length = audio_length
-        self.batch_size = batch_size
     
     def decode_tfrecord(self, record_bytes):
         batch = tf.io.parse_single_example(
@@ -74,8 +75,8 @@ class GenericDataset(DataProvider):
 
 ### OrchideaSol dataset ###
 class OrchideaSol(GenericDataset):
-    def __init__(self, split, audio_length=4, sample_rate=16000, frame_rate=250, batch_size=1):
-        super().__init__(audio_length, sample_rate, frame_rate, batch_size)
+    def __init__(self, split, audio_length=4, sample_rate=16000, frame_rate=250):
+        super().__init__(audio_length, sample_rate, frame_rate)
         self.split = split
         self.path = os.path.join(customPath.orchideaSOL(), f'{split}.tfrecord')
 
@@ -87,7 +88,7 @@ class OrchideaSol(GenericDataset):
 
         dataset = tf.data.TFRecordDataset(self.path).map(self.decode_tfrecord)
         if shuffle:
-            return dataset.shuffle(self.batch_size)
+            return dataset.shuffle(_max_dataset_length)
         else:
             return dataset
     
@@ -98,8 +99,8 @@ class OrchideaSol(GenericDataset):
 
 ### OrchideaSol_tiny dataset ###
 class OrchideaSolTiny(GenericDataset):
-    def __init__(self, split, audio_length=4, sample_rate=16000, frame_rate=250, batch_size=1):
-        super().__init__(audio_length, sample_rate, frame_rate, batch_size)
+    def __init__(self, split, audio_length=4, sample_rate=16000, frame_rate=250):
+        super().__init__(audio_length, sample_rate, frame_rate)
         self.split = split
         self.path = os.path.join(customPath.orchideaSOL_tiny(), f'{split}.tfrecord')
 
@@ -111,7 +112,7 @@ class OrchideaSolTiny(GenericDataset):
 
         dataset = tf.data.TFRecordDataset(self.path).map(self.decode_tfrecord)
         if shuffle:
-            return dataset.shuffle(self.batch_size)
+            return dataset.shuffle(_max_dataset_length)
         else:
             return dataset
     
@@ -122,8 +123,8 @@ class OrchideaSolTiny(GenericDataset):
 
 ### MedleySolosDB Data Generator ###
 class MedleySolosDB(GenericDataset):
-    def __init__(self, split, audio_length=4, sample_rate=16000, frame_rate=250, batch_size=1):
-        super().__init__(audio_length, sample_rate, frame_rate, batch_size)
+    def __init__(self, split, audio_length=4, sample_rate=16000, frame_rate=250):
+        super().__init__(audio_length, sample_rate, frame_rate)
         self.split = split
         self.path = os.path.join(customPath.medleySolosDB(), f'{split}.tfrecord')
 
@@ -135,7 +136,7 @@ class MedleySolosDB(GenericDataset):
 
         dataset = tf.data.TFRecordDataset(self.path).map(self.decode_tfrecord)
         if shuffle:
-            return dataset.shuffle(self.batch_size)
+            return dataset.shuffle(_max_dataset_length)
         else:
             return dataset
     
@@ -149,8 +150,8 @@ class MedleySolosDB(GenericDataset):
 
 ### Gtzan dataset ###
 class Gtzan(GenericDataset):
-    def __init__(self, split, audio_length=4, sample_rate=16000, frame_rate=250, batch_size=1):
-        super().__init__(audio_length, sample_rate, frame_rate, batch_size)
+    def __init__(self, split, audio_length=4, sample_rate=16000, frame_rate=250):
+        super().__init__(audio_length, sample_rate, frame_rate)
         self.split = split
         self.path = os.path.join(customPath.gtzan(), f'{split}.tfrecord')
 
@@ -162,7 +163,7 @@ class Gtzan(GenericDataset):
 
         dataset = tf.data.TFRecordDataset(self.path).map(self.decode_tfrecord)
         if shuffle:
-            return dataset.shuffle(self.batch_size)
+            return dataset.shuffle(_max_dataset_length)
         else:
             return dataset
     
