@@ -7,50 +7,47 @@ import sys
 import customPath
 import os
 
-def set():
-    # experiment definition
-    experiment = doce.Experiment(
-        name = 'sbr_replication',
-        purpose = 'evaluating sbr metrics with different parameters',
-        author = 'PA Grumiaux',
+# experiment definition
+experiment = doce.Experiment(
+    name = 'sbr_replication',
+    purpose = 'evaluating sbr metrics with different parameters',
+    author = 'PA Grumiaux',
+)
+
+# experiment path
+experiment.set_path('output', os.path.join(customPath.results(),experiment.name, ''))
+
+# experiment plan
+experiment.add_plan('plan',
+    alg = ['sbr', 'oracle', 'dumb', 'ddsp'],
+    data = ['sol', 'tiny', 'medley', 'gtzan'],
+    # method = ['replication', 'harmonic', 'replication+harmonic'],
+    # phase = ['oracle', 'flipped', 'noise'],
+    # matchingEnergy = [0.25, 0.5, 1.0],
+    # nfft = [1024],
+    batch_size = [16],
+    model = ['original_autoencoder'],
+    n_steps_total = [25],
+    n_steps_per_training = [5],
+    early_stop_loss_value = [None]
     )
 
-    # experiment path
-    experiment.set_path('output', os.path.join(customPath.results(),experiment.name, ''))
+# experiment metrics
+experiment.set_metric(
+    name = 'sdr',
+    significance = True,
+    higher_the_better = True
+)
 
-    # experiment plan
-    experiment.add_plan('plan',
-        alg = ['sbr', 'oracle', 'dumb', 'ddsp'],
-        data = ['sol', 'tiny', 'medley', 'gtzan'],
-        # method = ['replication', 'harmonic', 'replication+harmonic'],
-        # phase = ['oracle', 'flipped', 'noise'],
-        # matchingEnergy = [0.25, 0.5, 1.0],
-        # nfft = [1024],
-        batch_size = [16],
-        model = ['original_autoencoder'],
-        n_steps_total = [1000],
-        n_steps_per_training = [100],
-        early_stop_loss_value = [None]
-        )
+experiment.set_metric(
+    name = 'lsd',
+    significance = True,
+    lower_the_better = True
+)
 
-    # experiment metrics
-    experiment.set_metric(
-        name = 'sdr',
-        significance = True,
-        higher_the_better = True
-    )
-
-    experiment.set_metric(
-        name = 'lsd',
-        significance = True,
-        lower_the_better = True
-    )
-
-    experiment.set_metric(
-        name = 'time',
-    )
-
-    return experiment
+experiment.set_metric(
+    name = 'time',
+)
 
 # processing for each step in the plan 
 def step(setting, experiment):
@@ -64,4 +61,4 @@ def step(setting, experiment):
     np.save(os.path.join(experiment.path.output,setting.identifier()+'_time.npy'), time)
 
 if __name__ == "__main__":
-  doce.cli.main()
+  doce.cli.main(experiment = experiment, func = step)
