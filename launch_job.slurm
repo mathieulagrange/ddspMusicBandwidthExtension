@@ -9,18 +9,20 @@
 ##SBATCH --cpus-per-task=3           # nombre de coeurs CPU par tache (pour gpu_p2 : 1/8 du noeud 8-GPU)
 # /!\ Attention, "multithread" fait reference à l'hyperthreading dans la terminologie Slurm
 #SBATCH --hint=nomultithread         # hyperthreading desactive
-##SBATCH --time=00:10:00              # temps maximum d'execution demande (HH:MM:SS)
-#SBATCH --output=gpu_mono%j.out      # nom du fichier de sortie
-#SBATCH --error=gpu_mono%j.out       # nom du fichier d'erreur (ici commun avec la sortie)
+#SBATCH --time=20:00:00              # temps maximum d'execution demande (HH:MM:SS)
+#SBATCH --output=outputs/ddsp%j.out      # nom du fichier de sortie
+#SBATCH --error=outputs/ddsp%j.out       # nom du fichier d'erreur (ici commun avec la sortie)
  
 # nettoyage des modules charges en interactif et herites par defaut
 module purge
  
 # chargement des modules
-module load tensorflow-gpu/py3/2.3.0
- 
+module load tensorflow-gpu/py3/2.8.0  
+export PYTHONUSERBASE=$WORK/.idris_ddsp
+export PATH=$PYTHONUSERBASE/bin:$PATH
+
 # echo des commandes lancees
 set -x
  
 # execution du code
-python train.py
+python -u main.py -c -s alg=ddsp+data=sol
