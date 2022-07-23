@@ -1,4 +1,4 @@
-from data import OrchideaSol, MedleySolosDB
+from data import OrchideaSol, OrchideaSolTiny, MedleySolosDB
 from ddsp.training import train_util, trainers
 from ddsp import losses
 import tensorflow as tf
@@ -9,11 +9,11 @@ import os
 import time
 
 def train(model_name, model_dir, setting):
-    logging.basicConfig(filename=os.path.join(model_dir, f'{model_name}.log'), level=logging.INFO, format='%(name)s - %(asctime)s - %(message)s')
-
-    ### dataset ###
+    # dataset
     if setting.data == 'sol':
-        dataset = OrchideaSol('train', sample_rate=16000, frame_rate=250)
+        dataset = OrchideaSol('train', audio_length=4, sample_rate=16000, frame_rate=250)
+    elif setting.data == 'tiny':
+        dataset = OrchideaSolTiny('train', audio_length=4, sample_rate=16000, frame_rate=250)
 
     # model
     if setting.model == 'original_autoencoder':
