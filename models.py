@@ -67,3 +67,21 @@ class OriginalAutoencoder(Autoencoder):
                          decoder = decoder,
                          processor_group = processor_group,
                          losses = [spectral_loss])
+
+    def call(self, features, training=True):
+        """Run the core of the network, get predictions and loss."""
+        features = self.encode(features, training=training)
+        features.update(self.decoder(features, training=training))
+
+        # Run through processor group.
+        pg_out = self.processor_group(features, return_outputs_dict=True)
+
+        # Parse outputs
+        outputs = pg_out['controls']
+        outputs['audio_synth'] = pg_out['signal']
+
+        if training:
+            self._update_losses_dict(
+                self.loss_objs, features['audio_WB'], outputs['audio_synth'])
+
+        return outputs

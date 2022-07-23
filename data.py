@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from ddsp.training.data import DataProvider
+from ddsp.spectral_ops import compute_loudness
 import customPath
 import os
 import csv
@@ -8,6 +9,7 @@ from scipy.io.wavfile import read
 import pandas as pd
 from tqdm import tqdm
 import utils
+import librosa as lr
 
 _max_dataset_length = 100000
 
@@ -17,18 +19,21 @@ class GenericDataset(DataProvider):
         super().__init__(sample_rate, frame_rate)
         self.frame_length = int(self.sample_rate/self.frame_rate)
         self.audio_length = audio_length
+        self.sample_rate_LB = sample_rate//2
     
     def decode_tfrecord(self, record_bytes):
         batch = tf.io.parse_single_example(
             record_bytes,
             {'audio': tf.io.FixedLenFeature([], dtype=tf.string),
+            'audio_WB': tf.io.FixedLenFeature([], dtype=tf.string),
             'filename': tf.io.FixedLenFeature([], dtype=tf.string),
             'chunk': tf.io.FixedLenFeature([], dtype=tf.int64),
             'f0_hz': tf.io.FixedLenFeature([], dtype=tf.string),
             'loudness_db': tf.io.FixedLenFeature([], dtype=tf.string)}
         )
 
-        audio = tf.ensure_shape(tf.io.parse_tensor(batch['audio'], out_type=tf.float64), shape=(int(self.audio_length*self.sample_rate)))
+        audio = tf.ensure_shape(tf.io.parse_tensor(batch['audio'], out_type=tf.float64), shape=(int(self.audio_length*self.sample_rate_LB)))
+        audio_WB = tf.ensure_shape(tf.io.parse_tensor(batch['audio_WB'], out_type=tf.float64), shape=(int(self.audio_length*self.sample_rate)))
         filename = batch['filename']
         chunk = batch['chunk']
         f0_hz = tf.ensure_shape(tf.io.parse_tensor(batch['f0_hz'], out_type=tf.float64), shape=(int(self.audio_length*self.frame_rate)))
@@ -36,8 +41,10 @@ class GenericDataset(DataProvider):
 
         return {
             'audio': audio,
+            'audio_WB': audio_WB,
             'f0_hz': f0_hz,
-            'loudness_db': loudness_db
+            'loudness_db': loudness_db,
+            'filename': filename
         }
 
     def generate_tfrecord(self, path, split):
@@ -54,14 +61,18 @@ class GenericDataset(DataProvider):
                         x_chunk = x[i_chunk*n_sample_chunk:(i_chunk+1)*n_sample_chunk]
                         if x_chunk.size < n_sample_chunk:
                             x_chunk = np.concatenate((x_chunk, np.zeros((n_sample_chunk-x_chunk.size))))
-                        
+                        x_chunk_LB = lr.resample(x_chunk, orig_sr=self.sample_rate, target_sr=self.sample_rate_LB)
+
                         note, velocity = self.get_note_velocity(file_name)                       
 
                         f0_hz = utils.midi_to_hz(utils._PITCHES_MIDI_NUMBER[utils._PITCHES.index(note)])*np.ones((self.frame_rate*self.audio_length))
-                        loudness_db = -10*np.ones((self.frame_rate*self.audio_length))
+                        loudness_db = compute_loudness(x_chunk, sample_rate=self.sample_rate, frame_rate=self.frame_rate)
+                        print(loudness_db[:5])
+                        # loudness_db = -10*np.ones((self.frame_rate*self.audio_length))
 
                         record_bytes = tf.train.Example(features=tf.train.Features(feature={
-                            "audio": tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.io.serialize_tensor(x_chunk).numpy()])),
+                            "audio": tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.io.serialize_tensor(x_chunk_LB).numpy()])),
+                            "audio_WB": tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.io.serialize_tensor(x_chunk).numpy()])),
                             "filename": tf.train.Feature(bytes_list=tf.train.BytesList(value=[file_name.encode()])),
                             "chunk": tf.train.Feature(int64_list=tf.train.Int64List(value=[i_chunk])),
                             "f0_hz": tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.io.serialize_tensor(f0_hz).numpy()])),
