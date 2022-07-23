@@ -9,8 +9,8 @@ import os
 
 # experiment definition
 experiment = doce.Experiment(
-    name = 'sbr_replication',
-    purpose = 'evaluating sbr metrics with different parameters',
+    name = 'ddsp',
+    purpose = 'ddsp for bwe',
     author = 'PA Grumiaux',
 )
 
@@ -24,11 +24,11 @@ experiment.add_plan('plan',
     # method = ['replication', 'harmonic', 'replication+harmonic'],
     # phase = ['oracle', 'flipped', 'noise'],
     # matchingEnergy = [0.25, 0.5, 1.0],
-    # nfft = [1024],
+    nfft = [1024],
     batch_size = [16],
     model = ['original_autoencoder'],
-    n_steps_total = [25],
-    n_steps_per_training = [5],
+    n_steps_total = [200000],
+    n_steps_per_training = [20000],
     early_stop_loss_value = [None]
     )
 
