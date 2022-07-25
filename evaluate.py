@@ -117,7 +117,7 @@ def evaluate(setting, experiment):
 
     else:
         ### DDSP ALGO ###
-        model_name = 'ddsp_longTraining'
+        model_name = 'ddsp_estimatedLoudness'
         model_dir = os.path.join(customPath.models(), model_name)
         if not os.path.isdir(model_dir):
             os.mkdir(model_dir)
@@ -157,7 +157,6 @@ def evaluate(setting, experiment):
                     outputs = model(batch, training=False)
 
                     reconstructed_audio = model.get_audio_from_outputs(outputs).numpy()[0]
-                    print(reconstructed_audio)
                     reconstructed_stft = lr.stft(reconstructed_audio, n_fft = setting.nfft, hop_length = setting.nfft//2)
 
                     audio = batch['audio_WB'].numpy()
