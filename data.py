@@ -66,8 +66,8 @@ class GenericDataset(DataProvider):
                         note, velocity = self.get_note_velocity(file_name)                       
 
                         f0_hz = utils.midi_to_hz(utils._PITCHES_MIDI_NUMBER[utils._PITCHES.index(note)])*np.ones((self.frame_rate*self.audio_length))
-                        loudness_db = compute_loudness(x_chunk, sample_rate=self.sample_rate, frame_rate=self.frame_rate)
-                        print(loudness_db[:5])
+                        loudness_db = compute_loudness(x_chunk, sample_rate=self.sample_rate, frame_rate=self.frame_rate, use_tf=False)
+                        loudness_db = loudness_db[:self.frame_rate*self.audio_length]
                         # loudness_db = -10*np.ones((self.frame_rate*self.audio_length))
 
                         record_bytes = tf.train.Example(features=tf.train.Features(feature={
