@@ -27,8 +27,8 @@ experiment.add_plan('plan',
     nfft = [1024],
     batch_size = [16],
     model = ['original_autoencoder'],
-    n_steps_total = [200000],
-    n_steps_per_training = [20000],
+    n_steps_total = [30000],
+    n_steps_per_training = [5000],
     early_stop_loss_value = [None]
     )
 
