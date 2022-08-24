@@ -12,7 +12,7 @@ import tensorflow as tf
 import training
 import logging
 from models import OriginalAutoencoder
-from generate import generate_audio, checkpoint_test_generation
+from generate import checkpoint_test_generation, checkpoint_train_generation
 
 def evaluate(setting, experiment):
     tic = time.time()
@@ -50,7 +50,7 @@ def evaluate(setting, experiment):
             harmonic_duplication = False
 
         for i, test_data in tqdm(enumerate(ds_test)):
-            audio = test_data['audio'].numpy()
+            audio = test_data['audio_WB'].numpy()
 
             ### ORACLE ALGO ###
             if setting.alg == 'oracle':
@@ -117,7 +117,7 @@ def evaluate(setting, experiment):
 
     else:
         ### DDSP ALGO ###
-        model_name = 'ddsp_estimatedLoudness'
+        model_name = 'ddsp_estimatedLoudness_outputHB'
         model_dir = os.path.join(customPath.models(), model_name)
         if not os.path.isdir(model_dir):
             os.mkdir(model_dir)
@@ -140,6 +140,7 @@ def evaluate(setting, experiment):
                 training.train(model_name, os.path.join(model_dir, 'train_files'), setting)
                 logging.info('Generating reconstructed audio from some test data ...')
                 checkpoint_test_generation(model_dir, model, 'sol', latest_checkpoint_n_steps+setting.n_steps_per_training)
+                checkpoint_train_generation(model_dir, model, 'sol', latest_checkpoint_n_steps+setting.n_steps_per_training)
                 logging.info('Reconstruction done.')
             
             else:
@@ -147,6 +148,7 @@ def evaluate(setting, experiment):
                 logging.info('The training has reached the maximum number of steps.')
                 logging.info('Generating reconstructed audio from some test data ...')
                 checkpoint_test_generation(model_dir, model, 'sol', latest_checkpoint_n_steps+setting.n_steps_per_training)
+                checkpoint_train_generation(model_dir, model, 'sol', latest_checkpoint_n_steps+setting.n_steps_per_training)
                 logging.info('Reconstruction done.')
                 
                 # compute metrics for the whole test dataset

@@ -48,7 +48,7 @@ def checkpoint_test_generation(model_dir, model, dataset, latest_checkpoint_n_st
             if not os.path.isdir(audio_dir):
                 os.mkdir(audio_dir)
                 os.mkdir(os.path.join(audio_dir, 'test'))
-            write(os.path.join(audio_dir, f'{name[:-4]}_regen_{latest_checkpoint_n_steps}.wav'), 16000, regen_audio.numpy()[0])
+            write(os.path.join(audio_dir, 'test', f'{name[:-4]}_regen_{latest_checkpoint_n_steps}.wav'), 16000, regen_audio.numpy()[0])
 
 def checkpoint_train_generation(model_dir, model, dataset, latest_checkpoint_n_steps = 0):
     if dataset == 'sol':
@@ -66,11 +66,9 @@ def checkpoint_train_generation(model_dir, model, dataset, latest_checkpoint_n_s
 
             # save audio file
             audio_dir = os.path.join(model_dir, 'audio')
-            if not os.path.isdir(audio_dir):
-                os.mkdir(audio_dir)
+            if not os.path.isdir(os.path.join(audio_dir, 'train')):
                 os.mkdir(os.path.join(audio_dir, 'train'))
-            write(os.path.join(audio_dir, f'{name[:-4]}_regen_{latest_checkpoint_n_steps}.wav'), 16000, regen_audio.numpy()[0])
-
+            write(os.path.join(audio_dir, 'train', f'{name[:-4]}_regen_{latest_checkpoint_n_steps}.wav'), 16000, regen_audio.numpy()[0])
 
 def generate_audio(model_dir, model, batch):
     model = OriginalAutoencoder()
@@ -80,5 +78,3 @@ def generate_audio(model_dir, model, batch):
     audio_gen = model.get_audio_from_outputs(outputs)
 
     return audio_gen
-
-
