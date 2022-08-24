@@ -6,6 +6,7 @@ import doce
 import sys
 import customPath
 import os
+from utils import filter_out_inf_then_mean
 
 # experiment definition
 experiment = doce.Experiment(
@@ -21,27 +22,28 @@ experiment.set_path('output', os.path.join(customPath.results(),experiment.name,
 experiment.add_plan('plan',
     alg = ['sbr', 'oracle', 'dumb', 'ddsp'],
     data = ['sol', 'tiny', 'medley', 'gtzan'],
-    # method = ['replication', 'harmonic', 'replication+harmonic'],
-    # phase = ['oracle', 'flipped', 'noise'],
-    # matchingEnergy = [0.25, 0.5, 1.0],
+    method = ['replication', 'harmonic', 'replication+harmonic'],
+    phase = ['oracle', 'flipped', 'noise'],
+    matchingEnergy = [0.25, 0.5, 1.0],
     nfft = [1024],
-    batch_size = [16],
-    model = ['original_autoencoder'],
-    n_steps_total = [30000],
-    n_steps_per_training = [5000],
-    early_stop_loss_value = [None]
+    # batch_size = [16],
+    # model = ['original_autoencoder'],
+    # n_steps_total = [30000],
+    # n_steps_per_training = [5000],
+    # early_stop_loss_value = [None]
     )
 
 # experiment metrics
 experiment.set_metric(
     name = 'sdr',
-    significance = True,
-    higher_the_better = True
+    significance = False,
+    higher_the_better = True,
+    func = filter_out_inf_then_mean
 )
 
 experiment.set_metric(
     name = 'lsd',
-    significance = True,
+    significance = False,
     lower_the_better = True
 )
 

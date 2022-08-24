@@ -1,4 +1,4 @@
-
+import numpy as np
 
 _PITCHES = ['C0', 'C#0', 'D0', 'D#0', 'E0', 'F0', 'F#0', 'G0', 'G#0', 'A0', 'A#0', 'B0',
             'C1', 'C#1', 'D1', 'D#1', 'E1', 'F1', 'F#1', 'G1', 'G#1', 'A1', 'A#1', 'B1',
@@ -17,3 +17,6 @@ _VELOCITIES = ['pp', 'p', 'mf', 'f', 'ff']
 def midi_to_hz(midi_number):
     hz = 440.0 * (2.0 ** ((midi_number - 69.0) / 12.0))
     return hz
+
+def filter_out_inf_then_mean(array):
+    return np.mean(array[~np.isinf(array)])
