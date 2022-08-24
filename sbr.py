@@ -1,3 +1,4 @@
+from nis import match
 import numpy as np
 import librosa as lr
 import peakutils
@@ -23,7 +24,6 @@ def sbr(spectrum_WB, phase_reconstruction = "oracle", replication = True, energy
             mag_spectrum_UB = np.zeros((nBands_UB))
         else:
             mag_spectrum_UB = mag_spectrum_LB[:nBands_UB] * energy_LB / energy_UB
-            mag_spectrum_UB = mag_spectrum_LB[:nBands_UB]
     else:
         mag_spectrum_UB = np.zeros((nBands_UB))
 
