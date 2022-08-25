@@ -127,6 +127,19 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-sandbox.py
+
+# temp files and results
+sandbox*.py
 bwe_viz.py
 customPath.py
+*.ipynb
+bwe38.yml
+slurm/
+results/
+old_code/
+models/
+other_scripts/
+export/
+generate_sbr_outputs.py
+visualize.py
+.gitignore
