@@ -10,7 +10,7 @@ def orchideaSOL_tiny():
     return os.path.join(dataset(),'orchideaSOL_tiny')
 
 def medleySolosDB():
-    return os.path.join(dataset(),'medley-solos-DB')
+    return os.path.join(dataset(),'medley')
 
 def gtzan():
     return os.path.join(dataset(), 'gtzan')

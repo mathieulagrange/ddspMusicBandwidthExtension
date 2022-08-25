@@ -11,6 +11,9 @@ from tqdm import tqdm
 import utils
 import librosa as lr
 from math import ceil
+import warnings
+
+warnings.simplefilter("ignore", RuntimeWarning)
 
 _max_dataset_length = 100000
 
@@ -22,7 +25,7 @@ class GenericDataset(DataProvider):
         self.audio_length = audio_length
         self.sample_rate_LB = sample_rate//2
     
-    def generate_tfrecord(self, path, split):
+    def generate_tfrecord(self, path, split, estimate_f0=False):
             file_list = [f for f in os.listdir(os.path.join(path, split)) if f.endswith('.wav')]
             with tf.io.TFRecordWriter(os.path.join(path, f'{split}.tfrecord')) as file_writer:
                 for file_name in tqdm(file_list):
@@ -42,8 +45,10 @@ class GenericDataset(DataProvider):
                         x_chunk_stft[:ceil(x_chunk_stft.shape[0]/2)] = np.zeros((ceil(x_chunk_stft.shape[0]/2), x_chunk_stft.shape[1]))
                         x_chunk_HB = lr.istft(x_chunk_stft, n_fft=1024)
                         note, velocity = self.get_note_velocity(file_name)                       
-
-                        f0_hz = utils.midi_to_hz(utils._PITCHES_MIDI_NUMBER[utils._PITCHES.index(note)])*np.ones((self.frame_rate*self.audio_length))
+                        if estimate_f0:
+                            f0_hz = 0
+                        else:
+                            f0_hz = utils.midi_to_hz(utils._PITCHES_MIDI_NUMBER[utils._PITCHES.index(note)])*np.ones((self.frame_rate*self.audio_length))
                         loudness_db = compute_loudness(x_chunk, sample_rate=self.sample_rate, frame_rate=self.frame_rate, use_tf=False)
                         loudness_db = loudness_db[:self.frame_rate*self.audio_length]
                         # loudness_db = -10*np.ones((self.frame_rate*self.audio_length))
@@ -160,11 +165,11 @@ class MedleySolosDB(GenericDataset):
             return dataset
     
     def get_note_velocity(self, filename):
-        # all_metadata = pd.read_csv(os.path.join(os.path.dirname(self.path), 'medley-solos-DB_metadata.csv'))
-        # uuid4 = filename[:-4].split('_')[2]
-        # metadata = all_metadata[all_metadata['uuid4'].str.contains(uuid4)]
+        all_metadata = pd.read_csv(os.path.join(os.path.dirname(self.path), 'medley-solos-DB_metadata.csv'))
+        uuid4 = filename[:-4].split('_')[2]
+        metadata = all_metadata[all_metadata['uuid4'].str.contains(uuid4)]
         note = 'A0'
-        velocity = 'mf'
+        velocity = None
         return note, velocity
 
 ### Gtzan dataset ###
