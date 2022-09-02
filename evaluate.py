@@ -11,6 +11,7 @@ import customPath
 import tensorflow as tf
 import training
 import logging
+from math import ceil
 from models import OriginalAutoencoder
 from generate import checkpoint_test_generation, checkpoint_train_generation
 
@@ -117,7 +118,7 @@ def evaluate(setting, experiment):
 
     else:
         ### DDSP ALGO ###
-        model_name = 'ddsp_estimatedLoudness_outputHB'
+        model_name = 'ddsp_estimatedLoudness_outputWB'
         model_dir = os.path.join(customPath.models(), model_name)
         if not os.path.isdir(model_dir):
             os.mkdir(model_dir)
@@ -135,7 +136,7 @@ def evaluate(setting, experiment):
             # check if the training is completely done
             if latest_checkpoint_n_steps < setting.n_steps_total:
             # we train the model again for setting.n_steps_per_training steps
-                logging.info(f'Training is restarted from step {latest_checkpoint_n_steps} out of n_steps_total.')
+                logging.info(f'Training is restarted from step {latest_checkpoint_n_steps} out of {n_steps_total}.')
                 
                 training.train(model_name, os.path.join(model_dir, 'train_files'), setting)
                 logging.info('Generating reconstructed audio from some test data ...')
@@ -155,15 +156,23 @@ def evaluate(setting, experiment):
                 tic = time.time()
                 ds_test = ds_test.batch(batch_size=1)
                 model.restore(os.path.join(model_dir, 'train_files'))
+                logging.info('Computing metrics for the whole test dataset ...')
                 for i_batch, batch in enumerate(ds_test):
+                    # output generation from the ddsp model
                     outputs = model(batch, training=False)
 
+                    # reconstructed signal + stft
                     reconstructed_audio = model.get_audio_from_outputs(outputs).numpy()[0]
                     reconstructed_stft = lr.stft(reconstructed_audio, n_fft = setting.nfft, hop_length = setting.nfft//2)
 
-                    audio = batch['audio_WB'].numpy()
+                    # original WB signal + stft
+                    audio = batch['audio_WB'].numpy()[0]
                     stft = lr.stft(audio, n_fft = setting.nfft, hop_length = setting.nfft//2)
 
+                    # we replace the LB with the ground-truth before computing metrics
+                    reconstructed_stft[:ceil(setting.nfft//4), :] = stft[:ceil(setting.nfft//4), :]
+
+                    # we compute metrics and store them
                     cur_sdr = sdr(audio, reconstructed_audio)
                     cur_lsd = lsd(stft, reconstructed_stft)
 
