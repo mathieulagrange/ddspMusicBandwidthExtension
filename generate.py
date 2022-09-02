@@ -39,12 +39,13 @@ def checkpoint_test_generation(model_dir, model, dataset, latest_checkpoint_n_st
 
     for batch in ds_test:
         name = batch['filename'].numpy()[0].decode('utf-8')
-        if name in filenames_to_generate_sol_test:
+        audio_dir = os.path.join(model_dir, 'audio')
+        if name in filenames_to_generate_sol_test and not os.path.isfile(os.path.join(audio_dir, 'test', f'{name[:-4]}_regen_{latest_checkpoint_n_steps}.wav')):
             outputs = model(batch, training=False)
             regen_audio = model.get_audio_from_outputs(outputs)
 
             # save audio file
-            audio_dir = os.path.join(model_dir, 'audio')
+            # audio_dir = os.path.join(model_dir, 'audio')
             if not os.path.isdir(audio_dir):
                 os.mkdir(audio_dir)
                 os.mkdir(os.path.join(audio_dir, 'test'))
@@ -60,7 +61,8 @@ def checkpoint_train_generation(model_dir, model, dataset, latest_checkpoint_n_s
 
     for batch in ds_test:
         name = batch['filename'].numpy()[0].decode('utf-8')
-        if name in filenames_to_generate_sol_train:
+        audio_dir = os.path.join(model_dir, 'audio')
+        if name in filenames_to_generate_sol_train and not os.path.isfile(os.path.join(audio_dir, 'train', f'{name[:-4]}_regen_{latest_checkpoint_n_steps}.wav')):
             outputs = model(batch, training=False)
             regen_audio = model.get_audio_from_outputs(outputs)
 
