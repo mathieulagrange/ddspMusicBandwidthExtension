@@ -19,31 +19,38 @@ experiment = doce.Experiment(
 experiment.set_path('output', os.path.join(customPath.results(),experiment.name, ''))
 
 # experiment plan
-experiment.add_plan('plan',
-    alg = ['sbr', 'oracle', 'dumb', 'ddsp'],
+experiment.add_plan('sbr',
+    alg = ['sbr', 'oracle', 'dumb'],
     data = ['sol', 'tiny', 'medley', 'gtzan'],
     method = ['replication', 'harmonic', 'replication+harmonic'],
     phase = ['oracle', 'flipped', 'noise'],
     matchingEnergy = [0.25, 0.5, 1.0],
     nfft = [1024],
-    # batch_size = [16],
-    # model = ['original_autoencoder'],
-    # n_steps_total = [30000],
-    # n_steps_per_training = [5000],
-    # early_stop_loss_value = [None]
+    )
+
+experiment.add_plan('ddsp',
+    alg = ['ddsp'],
+    data = ['sol', 'tiny', 'medley', 'gtzan'],
+    batch_size = [2],
+    model = ['original_autoencoder'],
+    n_steps_total = [50000],
+    n_steps_per_training = [5000],
+    nfft = [1024],
+    early_stop_loss_value = [None],
+    output = 'WB'
     )
 
 # experiment metrics
 experiment.set_metric(
     name = 'sdr',
-    significance = False,
+    significance = True,
     higher_the_better = True,
     func = filter_out_inf_then_mean
 )
 
 experiment.set_metric(
     name = 'lsd',
-    significance = False,
+    significance = True,
     lower_the_better = True
 )
 

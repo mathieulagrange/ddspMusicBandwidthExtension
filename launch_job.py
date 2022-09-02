@@ -8,12 +8,10 @@ if len(sys.argv)>2:
 else:
     exp_small_name = exp_name
 
-# if the bash file for the sequential training script doesn't exist, we write it
-if not os.path.isfile(f'./bash/{exp_name}.sh'):
-    print('to do')
 
 # if the slurm file doesn't exist, we write it
 if not os.path.isfile(f'./slurm/{exp_name}.sh'):
+    print('Creating the custom slurm script ...')
     lines = []
     lines.append('#!/bin/bash\n\n')
 
@@ -27,8 +25,8 @@ if not os.path.isfile(f'./slurm/{exp_name}.sh'):
 
     lines.append('#SBATCH --hint=nomultithread\n')
     lines.append('#SBATCH --time=20:00:00\n')
-    lines.append('#SBATCH --output=outputs/{exp_name}.out\n')
-    lines.append('#SBATCH --error=outputs/{exp_name}.out\n\n')
+    lines.append(f'#SBATCH --output=outputs/{exp_name}%j.out\n')
+    lines.append(f'#SBATCH --error=outputs/{exp_name}%j.out\n\n')
     
     lines.append('# nettoyage des modules charges en interactif et herites par defaut\n')
     lines.append('module purge\n\n')
@@ -42,10 +40,13 @@ if not os.path.isfile(f'./slurm/{exp_name}.sh'):
     lines.append('set -x\n\n')
     
     lines.append('# execution du code\n')
-    lines.append('python -u main.py -c -s alg=ddsp+data=sol\n')
+    lines.append('python -u main.py -c -s ddsp/alg=ddsp+data=sol\n')
 
     with open(f'slurm/{exp_name}.slurm', 'w') as f:
         f.writelines(lines)
 
+    print('Slurm script written for this experiment')
+
 # call sequential_training.sh
+print('Launching the sequential_training.sh bash script ...')
 subprocess.run(['./sequential_training.sh', exp_name], stderr=subprocess.PIPE)
