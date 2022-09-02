@@ -14,6 +14,8 @@ def train(model_name, model_dir, setting):
         dataset = OrchideaSol('train', audio_length=4, sample_rate=16000, frame_rate=250)
     elif setting.data == 'tiny':
         dataset = OrchideaSolTiny('train', audio_length=4, sample_rate=16000, frame_rate=250)
+    elif setting.data == 'medley':
+        dataset = MedleySolosDB('train', audio_length=4, sample_rate=16000, frame_rate=250)
 
     # model
     if setting.model == 'original_autoencoder':
