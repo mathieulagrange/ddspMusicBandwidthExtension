@@ -7,6 +7,7 @@ import sys
 import customPath
 import os
 from utils import filter_out_inf_then_mean
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # experiment definition
 experiment = doce.Experiment(
@@ -37,7 +38,8 @@ experiment.add_plan('ddsp',
     n_steps_per_training = [5000],
     nfft = [1024],
     early_stop_loss_value = [None],
-    output = 'WB'
+    output = ['WB', 'HB'],
+    longTraining = [True, False]
     )
 
 # experiment metrics
