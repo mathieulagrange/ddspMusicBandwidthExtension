@@ -40,7 +40,7 @@ if not os.path.isfile(f'./slurm/{exp_name}.sh'):
     lines.append('set -x\n\n')
     
     lines.append('# execution du code\n')
-    lines.append('python -u main.py -c -s ddsp/alg=ddsp+data=sol\n')
+    lines.append('python -u train.py \n')
 
     with open(f'slurm/{exp_name}.slurm', 'w') as f:
         f.writelines(lines)
