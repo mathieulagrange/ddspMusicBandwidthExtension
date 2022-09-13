@@ -15,6 +15,8 @@ from math import ceil
 from models import OriginalAutoencoder
 from generate import checkpoint_test_generation, checkpoint_train_generation
 
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
 def evaluate(setting, experiment):
     tic = time.time()
 
@@ -109,93 +111,75 @@ def evaluate(setting, experiment):
 
                 # we compute the metrics
                 cur_sdr = sdr(audio, reconstructed_audio)
-                cur_lsd = lsd(stft, reconstructed_stft)
-
+                cur_lsd = lsd(stft[ceil(setting.nfft//4):], reconstructed_stft[ceil(setting.nfft//4):])
             
             # we save the metrics for this test data
             all_sdr[i] = cur_sdr
             all_lsd[i] = cur_lsd
 
     else:
-        ### DDSP ALGO ###
-        model_name = 'ddsp_estimatedLoudness_outputWB'
+        ### DDSP ALGO ###               
+        ds_test = ds_test.batch(batch_size=1)
+
+        # load model
+        if setting.data == 'sol':
+            if setting.output == 'WB':
+                if setting.longTraining:
+                    model_name = 'ddsp_estimatedLoudness_outputWB_longTraining'
+                else:
+                    model_name = 'ddsp_estimatedLoudness_outputWB'
+            else:
+                if setting.longTraining:
+                    model_name = 'ddsp_estimatedLoudness_outputHB_longTraining'
+                else:
+                    model_name = 'ddsp_estimatedLoudness_outputHB'
+        elif setting.data == 'medley':
+            if setting.output == 'WB':
+                if setting.longTraining:
+                    model_name = 'ddsp_estimatedLoudness_outputWB_medley_longTraining'
+                else:
+                    model_name = 'ddsp_estimatedLoudness_outputWB_medley'
+            else:
+                if setting.longTraining:
+                    model_name = 'ddsp_estimatedLoudness_outputHB_medley_longTraining'
+                else:
+                    model_name = 'ddsp_estimatedLoudness_outputHB_medley'
+
+        if setting.model == 'original_autoencoder':
+            model = OriginalAutoencoder()
+
         model_dir = os.path.join(customPath.models(), model_name)
-        if not os.path.isdir(model_dir):
-            os.mkdir(model_dir)
-        model = OriginalAutoencoder()
-        logging.basicConfig(filename=os.path.join(model_dir, 'training.log'), level=logging.INFO, format='%(name)s - %(asctime)s - %(message)s')
+        model.restore(os.path.join(model_dir, 'train_files'))
+        print('Trained model loaded.')
 
-        n_steps_total = int(setting.n_steps_total)
-        if os.path.isdir(os.path.join(model_dir, 'train_files')):
-            latest_checkpoint = tf.train.latest_checkpoint(os.path.join(model_dir, 'train_files'))
-            if latest_checkpoint is not None:
-                latest_checkpoint_n_steps = int(os.path.basename(latest_checkpoint).split('-')[-1])
-            else:
-                latest_checkpoint_n_steps = 0
+        print('Evaluation on the whole test set ...')
+        for i_batch, batch in tqdm(enumerate(ds_test)):
+            # output generation from the ddsp model
+            outputs = model(batch, training=False)
 
-            # check if the training is completely done
-            if latest_checkpoint_n_steps < setting.n_steps_total:
-            # we train the model again for setting.n_steps_per_training steps
-                logging.info(f'Training is restarted from step {latest_checkpoint_n_steps} out of {n_steps_total}.')
-                
-                training.train(model_name, os.path.join(model_dir, 'train_files'), setting)
-                logging.info('Generating reconstructed audio from some test data ...')
-                checkpoint_test_generation(model_dir, model, 'sol', latest_checkpoint_n_steps+setting.n_steps_per_training)
-                checkpoint_train_generation(model_dir, model, 'sol', latest_checkpoint_n_steps+setting.n_steps_per_training)
-                logging.info('Reconstruction done.')
+            # reconstructed signal + recontructed stft
+            print(outputs)
+            reconstructed_audio = model.get_audio_from_outputs(outputs).numpy()[0]
+            # print(reconstructed_audio)
+            raise ValueError("stop")
+            reconstructed_stft = lr.stft(reconstructed_audio, n_fft = setting.nfft, hop_length = setting.nfft//2)
+
+            # original WB signal + stft
+            audio = batch['audio_WB'].numpy()[0]
+            stft = lr.stft(audio, n_fft = setting.nfft, hop_length = setting.nfft//2)
+
+            # we replace the LB with the ground-truth before computing metrics
+            reconstructed_stft[:ceil(setting.nfft//4), :] = stft[:ceil(setting.nfft//4), :]
+
+            # we compute metrics and store them
+            cur_sdr = sdr(audio, reconstructed_audio)
+            cur_lsd = lsd(stft[ceil(setting.nfft//4):], reconstructed_stft[ceil(setting.nfft//4):])
+
+            all_sdr[i_batch] = cur_sdr
+            all_lsd[i_batch] = cur_lsd
+
+        print('Evaluation done.')
             
-            else:
-                # all training steps have been completed
-                logging.info('The training has reached the maximum number of steps.')
-                logging.info('Generating reconstructed audio from some test data ...')
-                checkpoint_test_generation(model_dir, model, 'sol', latest_checkpoint_n_steps+setting.n_steps_per_training)
-                checkpoint_train_generation(model_dir, model, 'sol', latest_checkpoint_n_steps+setting.n_steps_per_training)
-                logging.info('Reconstruction done.')
-                
-                # compute metrics for the whole test dataset
-                tic = time.time()
-                ds_test = ds_test.batch(batch_size=1)
-                model.restore(os.path.join(model_dir, 'train_files'))
-                logging.info('Computing metrics for the whole test dataset ...')
-                for i_batch, batch in enumerate(ds_test):
-                    # output generation from the ddsp model
-                    outputs = model(batch, training=False)
-
-                    # reconstructed signal + stft
-                    reconstructed_audio = model.get_audio_from_outputs(outputs).numpy()[0]
-                    reconstructed_stft = lr.stft(reconstructed_audio, n_fft = setting.nfft, hop_length = setting.nfft//2)
-
-                    # original WB signal + stft
-                    audio = batch['audio_WB'].numpy()[0]
-                    stft = lr.stft(audio, n_fft = setting.nfft, hop_length = setting.nfft//2)
-
-                    # we replace the LB with the ground-truth before computing metrics
-                    reconstructed_stft[:ceil(setting.nfft//4), :] = stft[:ceil(setting.nfft//4), :]
-
-                    # we compute metrics and store them
-                    cur_sdr = sdr(audio, reconstructed_audio)
-                    cur_lsd = lsd(stft, reconstructed_stft)
-
-                    all_sdr[i_batch] = cur_sdr
-                    all_lsd[i_batch] = cur_lsd
-                
-                toc = time.time()
-                elapsed_time = int(toc-tic)
-                logging.info('All metrics have been computed for the whole test dataset.')
-
-
-        # if no training has ever been done for this model
-        else:
-            latest_checkpoint_n_steps = 0
-            logging.info('No on-going trainings have been found.')
-            os.mkdir(os.path.join(model_dir, 'train_files'))
-            logging.info("Model dir have been created, with subdir 'train_files'.")
-            training.train(model_name, os.path.join(model_dir, 'train_files'), setting)
-
-            logging.info('Generating reconstructed audio from some test data ...')
-            checkpoint_test_generation(model_dir, model, 'sol', latest_checkpoint_n_steps+setting.n_steps_per_training)
-            logging.info('Reconstruction done.')
-
     toc = time.time()
     elapsed_time = int(toc-tic)
 
