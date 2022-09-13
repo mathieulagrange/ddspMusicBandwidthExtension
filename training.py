@@ -8,17 +8,17 @@ import logging
 import os
 import time
 
-def train(model_name, model_dir, setting):
+def train(model_dir, params):
     # dataset
-    if setting.data == 'sol':
+    if params['data'] == 'sol':
         dataset = OrchideaSol('train', audio_length=4, sample_rate=16000, frame_rate=250)
-    elif setting.data == 'tiny':
+    elif params['data'] == 'tiny':
         dataset = OrchideaSolTiny('train', audio_length=4, sample_rate=16000, frame_rate=250)
-    elif setting.data == 'medley':
+    elif params['data'] == 'medley':
         dataset = MedleySolosDB('train', audio_length=4, sample_rate=16000, frame_rate=250)
 
     # model
-    if setting.model == 'original_autoencoder':
+    if params['model'] == 'original_autoencoder':
         model = OriginalAutoencoder()
 
     # create training strategy
@@ -27,7 +27,7 @@ def train(model_name, model_dir, setting):
         trainer = trainers.get_trainer_class()(model, strategy, learning_rate=1e-3)
 
     # initiate dataset
-    dataset = dataset.get_batch(batch_size=setting.batch_size, shuffle=True, repeats=-1)
+    dataset = dataset.get_batch(batch_size=params['batch_size'], shuffle=True, repeats=-1)
     dataset = trainer.distribute_dataset(dataset)
     trainer.build(next(iter(dataset)))
     dataset_iter = iter(dataset)
@@ -48,8 +48,8 @@ def train(model_name, model_dir, setting):
         tic = time.time()
         first_step = True
 
-        if trainer.step < setting.n_steps_total:
-            for i in range(setting.n_steps_per_training):
+        if trainer.step < params['n_steps_total']:
+            for i in range(params['n_steps_per_training']):
                 losses = trainer.train_step(dataset_iter)
 
                 # if first step (starting or restarting) we create the loss metrics
@@ -69,9 +69,9 @@ def train(model_name, model_dir, setting):
                 logging.info(log_str)
 
                 # write summaries
-                if trainer.step % setting.n_steps_per_training == 0:
+                if trainer.step % params['n_steps_per_training'] == 0:
                     # training speed
-                    steps_per_sec = setting.n_steps_per_training/ (time.time() - tic)
+                    steps_per_sec = params['n_steps_per_training']/ (time.time() - tic)
                     tf.summary.scalar('steps_per_sec', steps_per_sec, step=trainer.step)
                     tic = time.time()
 
@@ -81,9 +81,9 @@ def train(model_name, model_dir, setting):
                         metric.reset_states()
 
                 # early stopping
-                if (setting.early_stop_loss_value is not None and
-                    losses['total_loss'] <= setting.early_stop_loss_value):
-                    logging.info('Total loss reached early stopping value of %s', setting.early_stop_loss_value)
+                if (params['early_stop_loss_value'] is not None and
+                    losses['total_loss'] <= params['early_stop_loss_value']):
+                    logging.info('Total loss reached early stopping value of %s', params['early_stop_loss_value'])
                     break
 
         #save model
@@ -92,4 +92,5 @@ def train(model_name, model_dir, setting):
         print('Model saved.')
         summary_writer.flush()
 
-    logging.info(f'Training done up to step {trainer.step.numpy()} of {setting.n_steps_total}')
+    n_steps_total = params['n_steps_total']
+    logging.info(f'Training done up to step {trainer.step.numpy()} of {n_steps_total}')
