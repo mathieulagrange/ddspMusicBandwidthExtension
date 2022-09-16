@@ -44,7 +44,7 @@ def compute_lsd(model_dir, model, data, split, step, nfft=1024, hop_length=512):
     elif data == 'medley':
         dataset = MedleySolosDB(split, 4, 16000, 250)
     elif data == 'gtzan':
-        dataset = Gtzan('test', 4, 16000, 250)
+        dataset = Gtzan(split, 4, 16000, 250)
     ds = dataset.get_dataset()
     ds = ds.batch(batch_size=1)
 
