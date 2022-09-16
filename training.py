@@ -19,7 +19,7 @@ def train(model_dir, params):
 
     # model
     if params['model'] == 'original_autoencoder':
-        model = OriginalAutoencoder()
+        model = OriginalAutoencoder(params['output'])
 
     # create training strategy
     strategy = train_util.get_strategy()

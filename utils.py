@@ -1,4 +1,5 @@
 import numpy as np
+import os
 
 _PITCHES = ['C0', 'C#0', 'D0', 'D#0', 'E0', 'F0', 'F#0', 'G0', 'G#0', 'A0', 'A#0', 'B0',
             'C1', 'C#1', 'D1', 'D#1', 'E1', 'F1', 'F#1', 'G1', 'G#1', 'A1', 'A#1', 'B1',
@@ -20,3 +21,6 @@ def midi_to_hz(midi_number):
 
 def filter_out_inf_then_mean(array):
     return np.mean(array[~np.isinf(array)])
+
+def get_checkpoint(checkpoint_path, step):
+    return os.path.join(checkpoint_path, f'ckpt-{step}')

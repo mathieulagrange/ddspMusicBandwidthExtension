@@ -12,7 +12,7 @@ import tensorflow as tf
 import training
 import logging
 from math import ceil
-from models import OriginalAutoencoder
+from models import OriginalAutoencoder, SulunResNet
 from generate import checkpoint_test_generation, checkpoint_train_generation
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
@@ -122,23 +122,27 @@ def evaluate(setting, experiment):
         ds_test = ds_test.batch(batch_size=1)
 
         # load model
+        step = None
         if setting.data == 'sol':
             if setting.output == 'WB':
                 if setting.longTraining:
                     model_name = 'ddsp_estimatedLoudness_outputWB_longTraining'
                 else:
-                    model_name = 'ddsp_estimatedLoudness_outputWB'
+                    model_name = 'ddsp_estimatedLoudness_outputWB_sol_monitoringMetrics'
+                    step = 60000
             else:
                 if setting.longTraining:
                     model_name = 'ddsp_estimatedLoudness_outputHB_longTraining'
                 else:
-                    model_name = 'ddsp_estimatedLoudness_outputHB'
+                    model_name = 'ddsp_estimatedLoudness_outputHB_sol_monitoringMetrics'
+                    step = 50000
         elif setting.data == 'medley':
             if setting.output == 'WB':
                 if setting.longTraining:
                     model_name = 'ddsp_estimatedLoudness_outputWB_medley_longTraining'
                 else:
-                    model_name = 'ddsp_estimatedLoudness_outputWB_medley'
+                    model_name = 'ddsp_estimatedLoudness_outputWB_medley_monitoringMetrics'
+                    step = 50000
             else:
                 if setting.longTraining:
                     model_name = 'ddsp_estimatedLoudness_outputHB_medley_longTraining'
@@ -147,9 +151,12 @@ def evaluate(setting, experiment):
 
         if setting.model == 'original_autoencoder':
             model = OriginalAutoencoder()
+        elif setting.model == 'resnet':
+            model = SulunResNet()
+            print('ResNet loaded')
 
         model_dir = os.path.join(customPath.models(), model_name)
-        model.restore(os.path.join(model_dir, 'train_files'))
+        model.restore(os.path.join(model_dir, 'train_files'), step=step)
         print('Trained model loaded.')
 
         print('Evaluation on the whole test set ...')
@@ -158,10 +165,7 @@ def evaluate(setting, experiment):
             outputs = model(batch, training=False)
 
             # reconstructed signal + recontructed stft
-            print(outputs)
             reconstructed_audio = model.get_audio_from_outputs(outputs).numpy()[0]
-            # print(reconstructed_audio)
-            raise ValueError("stop")
             reconstructed_stft = lr.stft(reconstructed_audio, n_fft = setting.nfft, hop_length = setting.nfft//2)
 
             # original WB signal + stft
