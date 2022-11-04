@@ -17,12 +17,10 @@
 module purge
  
 # chargement des modules
-module load tensorflow-gpu/py3/2.8.0  
-export PYTHONUSERBASE=$WORK/.idris_ddsp
-export PATH=$PYTHONUSERBASE/bin:$PATH
+module load pytorch-gpu/py3/1.12.1
 
 # echo des commandes lancees
 set -x
  
 # execution du code
-python -u main.py -c -s alg=ddsp+data=sol
+python -u train.py --name test --steps 1200 --batch 1

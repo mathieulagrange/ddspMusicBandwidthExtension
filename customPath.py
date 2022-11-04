@@ -15,6 +15,12 @@ def medleySolosDB():
 def gtzan():
     return os.path.join(dataset(), 'gtzan')
 
+def nsynth():
+    return os.path.join(dataset(), 'nsynth')
+
+def synthetic():
+    return os.path.join(dataset(), 'synthetic')
+
 def results():
     return os.path.join(os.getcwd(),'results', '')
 

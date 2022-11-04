@@ -1,96 +1,178 @@
-from data import OrchideaSol, OrchideaSolTiny, MedleySolosDB, Gtzan
-import numpy as np
-import librosa as lr
+import torch
+from torch.utils.tensorboard import SummaryWriter
+import yaml
+from model import DDSP
+from effortless_config import Config
+from os import path
+from preprocess import Dataset
 from tqdm import tqdm
-from scipy.io.wavfile import write
+from core import multiscale_fft, safe_log, mean_std_loudness
+import soundfile as sf
+from einops import rearrange
+from utils import get_scheduler
+import numpy as np
 import os
 import customPath
-import tensorflow as tf
-import training
-import logging
-from math import ceil
-from models import OriginalAutoencoder
-from generate import checkpoint_test_generation, checkpoint_train_generation
-from metrics import compute_lsd, compute_mss
+from scipy.io.wavfile import write
 
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+torch.manual_seed(4)
 
-params = {
-    'model_name': 'ddsp_estimatedLoudness_outputWB_sol_monitoringMetrics',
-    'data': 'sol',
-    'batch_size': 2,
-    'model': 'original_autoencoder',
-    'n_steps_total': 100000,
-    'n_steps_per_training': 10000,
-    'nfft': 1024,
-    'early_stop_loss_value': None,
-    'output': 'WB',
-    'longTraining': False
-}
+class args(Config):
+    CONFIG = "config.yaml"
+    NAME = "debug"
+    ROOT = "runs"
+    STEPS = 500000
+    BATCH = 16
+    START_LR = 1e-3
+    STOP_LR = 1e-4
+    DECAY_OVER = 400000
+    DATASET = "synthetic"
 
-model_dir = os.path.join(customPath.models(), params['model_name'])
-if not os.path.isdir(model_dir):
-    os.mkdir(model_dir)
-model = OriginalAutoencoder()
-logging.basicConfig(filename=os.path.join(model_dir, 'training.log'), level=logging.INFO, format='%(name)s - %(asctime)s - %(message)s')
+args.parse_args()
 
-n_steps_total = params['n_steps_total']
-if os.path.isdir(os.path.join(model_dir, 'train_files')):
-    latest_checkpoint = tf.train.latest_checkpoint(os.path.join(model_dir, 'train_files'))
-    if latest_checkpoint is not None:
-        latest_checkpoint_n_steps = int(os.path.basename(latest_checkpoint).split('-')[-1])
-    else:
-        latest_checkpoint_n_steps = 0
+with open(args.CONFIG, "r") as config:
+    config = yaml.safe_load(config)
 
-    # check if the training is completely done
-    if latest_checkpoint_n_steps < params['n_steps_total']:
-        # we train the model again for setting.n_steps_per_training steps
-        logging.info(f'Training is restarted from step {latest_checkpoint_n_steps} out of {n_steps_total}.')
-        
-        training.train(os.path.join(model_dir, 'train_files'), params)
-        logging.info('Generating reconstructed audio from some test data ...')
-        checkpoint_test_generation(model_dir, model, params['data'], latest_checkpoint_n_steps+params['n_steps_per_training'])
-        logging.info('Generating reconstructed audio from some train data ...')
-        checkpoint_train_generation(model_dir, model, params['data'], latest_checkpoint_n_steps+params['n_steps_per_training'])
-        logging.info('Reconstruction done.')
-        compute_lsd(model_dir, model, params['data'], 'train', latest_checkpoint_n_steps+params['n_steps_per_training'])
-        compute_lsd(model_dir, model, params['data'], 'valid', latest_checkpoint_n_steps+params['n_steps_per_training'])
-        compute_lsd(model_dir, model, params['data'], 'test', latest_checkpoint_n_steps+params['n_steps_per_training'])
-        compute_mss(model_dir, model, params['data'], 'train', latest_checkpoint_n_steps+params['n_steps_per_training'])
-        compute_mss(model_dir, model, params['data'], 'valid', latest_checkpoint_n_steps+params['n_steps_per_training'])
-        compute_mss(model_dir, model, params['data'], 'test', latest_checkpoint_n_steps+params['n_steps_per_training'])
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda:0")
 
-    else:
-        # all training steps have been completed
-        logging.info('The training has reached the maximum number of steps.')
-        logging.info('Generating reconstructed audio from some test data ...')
-        checkpoint_test_generation(model_dir, model, 'sol', latest_checkpoint_n_steps+params['n_steps_per_training'])
-        logging.info('Generating reconstructed audio from some train data ...')
-        checkpoint_train_generation(model_dir, model, 'sol', latest_checkpoint_n_steps+params['n_steps_per_training'])
-        logging.info('Reconstruction done.')
+model = DDSP(**config["model"]).to(device)
 
-        compute_lsd(model_dir, model, params['data'], 'train', latest_checkpoint_n_steps+params['n_steps_per_training'])
-        compute_lsd(model_dir, model, params['data'], 'valid', latest_checkpoint_n_steps+params['n_steps_per_training'])
-        compute_lsd(model_dir, model, params['data'], 'test', latest_checkpoint_n_steps+params['n_steps_per_training'])
-        compute_mss(model_dir, model, params['data'], 'train', latest_checkpoint_n_steps+params['n_steps_per_training'])
-        compute_mss(model_dir, model, params['data'], 'valid', latest_checkpoint_n_steps+params['n_steps_per_training'])
-        compute_mss(model_dir, model, params['data'], 'test', latest_checkpoint_n_steps+params['n_steps_per_training'])
+if args.DATASET == "synthetic":
+    dataset = Dataset(os.path.join(customPath.synthetic(), 'preprocessed/train_jeanzay'))
+elif args.DATASET == "acc":
+    dataset = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed/acc'))
+elif args.DATASET == "sol":
+    dataset = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed/sol'))
 
-# if no training has ever been done for this model
-else:
-    latest_checkpoint_n_steps = 0
-    logging.info('No on-going trainings have been found.')
-    os.mkdir(os.path.join(model_dir, 'train_files'))
-    logging.info("Model dir have been created, with subdir 'train_files'.")
-    training.train(os.path.join(model_dir, 'train_files'), params)
+dataloader = torch.utils.data.DataLoader(
+    dataset,
+    args.BATCH,
+    True,
+    drop_last=True,
+)
 
-    logging.info('Generating reconstructed audio from some test data ...')
-    checkpoint_test_generation(model_dir, model, 'sol', latest_checkpoint_n_steps+params['n_steps_per_training'])
-    logging.info('Reconstruction done.')
+mean_loudness, std_loudness = mean_std_loudness(dataloader)
+config["data"]["mean_loudness"] = mean_loudness
+config["data"]["std_loudness"] = std_loudness
 
-    compute_lsd(model_dir, model, params['data'], 'train', latest_checkpoint_n_steps+params['n_steps_per_training'])
-    compute_lsd(model_dir, model, params['data'], 'valid', latest_checkpoint_n_steps+params['n_steps_per_training'])
-    compute_lsd(model_dir, model, params['data'], 'test', latest_checkpoint_n_steps+params['n_steps_per_training'])
-    compute_mss(model_dir, model, params['data'], 'train', latest_checkpoint_n_steps+params['n_steps_per_training'])
-    compute_mss(model_dir, model, params['data'], 'valid', latest_checkpoint_n_steps+params['n_steps_per_training'])
-    compute_mss(model_dir, model, params['data'], 'test', latest_checkpoint_n_steps+params['n_steps_per_training'])
+os.makedirs(path.join(customPath.models(), args.NAME), exist_ok=True)
+writer = SummaryWriter(path.join(customPath.models(), args.NAME), flush_secs=20)
+
+with open(path.join(customPath.models(), args.NAME, "config.yaml"), "w") as out_config:
+    yaml.safe_dump(config, out_config)
+
+opt = torch.optim.Adam(model.parameters(), lr=args.START_LR)
+
+schedule = get_scheduler(
+    len(dataloader),
+    args.START_LR,
+    args.STOP_LR,
+    args.DECAY_OVER,
+)
+
+# scheduler = torch.optim.lr_scheduler.LambdaLR(opt, schedule)
+# scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size=10000, gamma=0.1, verbose=True)
+
+best_loss = float("inf")
+mean_loss = 0
+n_element = 0
+step = 0
+epochs = int(np.ceil(args.STEPS / len(dataloader)))
+
+for e in tqdm(range(epochs)):
+    index_s = 0
+    for s, p, l in dataloader:
+        # s = s/s.max()
+        s = s.to(device)
+        p = p.unsqueeze(-1).to(device)
+        l = l.unsqueeze(-1).to(device)
+
+        l = (l - mean_loudness) / std_loudness
+
+        y = model(s, p, l).squeeze(-1)
+
+        ori_stft = multiscale_fft(
+            s,
+            config["train"]["scales"],
+            config["train"]["overlap"],
+        )
+        rec_stft = multiscale_fft(
+            y,
+            config["train"]["scales"],
+            config["train"]["overlap"],
+        )
+
+        loss = 0
+        for s_x, s_y in zip(ori_stft, rec_stft):
+            lin_loss = (s_x - s_y).abs().mean()
+            log_loss = (safe_log(s_x) - safe_log(s_y)).abs().mean()
+            loss = loss + lin_loss + log_loss
+
+        opt.zero_grad()
+        loss.backward()
+        opt.step()
+
+        writer.add_scalar("loss", loss.item(), step)
+
+        step += 1
+
+        n_element += 1
+        mean_loss += (loss.item() - mean_loss) / n_element
+        print(f'Step {step}, loss: {mean_loss}')
+
+
+    if not e % 10:
+        writer.add_scalar("lr", schedule(e), e)
+        writer.add_scalar("reverb_decay", model.reverb.decay.item(), e)
+        writer.add_scalar("reverb_wet", model.reverb.wet.item(), e)
+        # scheduler.step()
+        if mean_loss < best_loss:
+            best_loss = mean_loss
+            torch.save(
+                model.state_dict(),
+                path.join(customPath.models(), args.NAME, "state.pth"),
+            )
+
+        mean_loss = 0
+        n_element = 0     
+
+        index_s += 1
+
+
+# generate some examples
+dataloader = torch.utils.data.DataLoader(
+    dataset,
+    1,
+    False,
+    drop_last=True,
+)
+model.load_state_dict(torch.load(os.path.join(customPath.models(), args.NAME, "state.pth"), map_location=torch.device('cpu')))
+model.eval()
+
+index_s = 0
+for s, p, l in dataloader:
+    # s = s/s.max()
+    s = s.to(device)
+    p = p.unsqueeze(-1).to(device)
+    l = l.unsqueeze(-1).to(device)
+
+    l = (l - mean_loudness) / std_loudness
+
+    y = model(s, p, l).squeeze(-1)
+
+    if not index_s % 1000:
+        orig_audio = s[0].detach().cpu().numpy()
+        regen_audio = y[0].detach().cpu().numpy()
+        sf.write(
+            path.join(customPath.models(), args.NAME, f"orig_{index_s}.wav"),
+            orig_audio,
+            config["preprocess"]["sampling_rate"],
+        )
+        sf.write(
+            path.join(customPath.models(), args.NAME, f"regen_{index_s}.wav"),
+            regen_audio,
+            config["preprocess"]["sampling_rate"],
+        )
+
+    index_s += 1

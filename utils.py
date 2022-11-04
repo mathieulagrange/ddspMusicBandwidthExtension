@@ -1,5 +1,6 @@
 import numpy as np
-import os
+import torch
+import math
 
 _PITCHES = ['C0', 'C#0', 'D0', 'D#0', 'E0', 'F0', 'F#0', 'G0', 'G#0', 'A0', 'A#0', 'B0',
             'C1', 'C#1', 'D1', 'D#1', 'E1', 'F1', 'F#1', 'G1', 'G#1', 'A1', 'A#1', 'B1',
@@ -13,14 +14,16 @@ _PITCHES = ['C0', 'C#0', 'D0', 'D#0', 'E0', 'F0', 'F#0', 'G0', 'G#0', 'A0', 'A#0
 
 _PITCHES_MIDI_NUMBER = [i+12 for i in range(len(_PITCHES))]
 
-_VELOCITIES = ['pp', 'p', 'mf', 'f', 'ff']
+def scale_function(x):
+    return 2 * torch.sigmoid(x)**(math.log(10)) + 1e-7
 
-def midi_to_hz(midi_number):
-    hz = 440.0 * (2.0 ** ((midi_number - 69.0) / 12.0))
-    return hz
+def get_scheduler(len_dataset, start_lr, stop_lr, length):
+    def schedule(epoch):
+        step = epoch * len_dataset
+        if step < length:
+            t = step / length
+            return start_lr * (1 - t) + stop_lr * t
+        else:
+            return stop_lr
 
-def filter_out_inf_then_mean(array):
-    return np.mean(array[~np.isinf(array)])
-
-def get_checkpoint(checkpoint_path, step):
-    return os.path.join(checkpoint_path, f'ckpt-{step}')
+    return schedule
