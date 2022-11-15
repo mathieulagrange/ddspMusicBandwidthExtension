@@ -14,8 +14,7 @@ import numpy as np
 import os
 import customPath
 from scipy.io.wavfile import write
-
-torch.manual_seed(4)
+import logging
 
 class args(Config):
     CONFIG = "config.yaml"
@@ -33,20 +32,23 @@ args.parse_args()
 with open(args.CONFIG, "r") as config:
     config = yaml.safe_load(config)
 
+torch.manual_seed(4)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# device = torch.device("cuda:0")
+
+os.makedirs(path.join(customPath.models(), args.NAME), exist_ok=True)
+logging.basicConfig(filename=os.path.join(customPath.models(), args.NAME, 'training.log'), level=logging.INFO, format='%(name)s - %(asctime)s - %(message)s')
 
 model = DDSP(**config["model"]).to(device)
 
 if args.DATASET == "synthetic":
-    dataset = Dataset(os.path.join(customPath.synthetic(), 'preprocessed/train_jeanzay'))
-elif args.DATASET == "acc":
-    dataset = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed/acc'))
+    dataset_train = Dataset(os.path.join(customPath.synthetic(), 'preprocessed/train'))
+    dataset_test = Dataset(os.path.join(customPath.synthetic(), 'preprocessed/test'))
 elif args.DATASET == "sol":
-    dataset = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed/sol'))
+    dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed/train'))
+    dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed/test'))
 
 dataloader = torch.utils.data.DataLoader(
-    dataset,
+    dataset_train,
     args.BATCH,
     True,
     drop_last=True,
@@ -56,7 +58,6 @@ mean_loudness, std_loudness = mean_std_loudness(dataloader)
 config["data"]["mean_loudness"] = mean_loudness
 config["data"]["std_loudness"] = std_loudness
 
-os.makedirs(path.join(customPath.models(), args.NAME), exist_ok=True)
 writer = SummaryWriter(path.join(customPath.models(), args.NAME), flush_secs=20)
 
 with open(path.join(customPath.models(), args.NAME, "config.yaml"), "w") as out_config:
@@ -82,18 +83,22 @@ epochs = int(np.ceil(args.STEPS / len(dataloader)))
 
 for e in tqdm(range(epochs)):
     index_s = 0
-    for s, p, l in dataloader:
+    for s_WB, s_LB, p, l in dataloader:
         # s = s/s.max()
-        s = s.to(device)
+        s_WB = s_WB.to(device)
+        s_LB = s_LB.to(device)
         p = p.unsqueeze(-1).to(device)
         l = l.unsqueeze(-1).to(device)
 
         l = (l - mean_loudness) / std_loudness
 
-        y = model(s, p, l).squeeze(-1)
+        if config['data']['input'] == 'LB':
+            y = model(s_LB, p, l).squeeze(-1)
+        elif config['data']['input'] == 'WB':
+            y = model(s_WB, p, l).squeeze(-1)
 
         ori_stft = multiscale_fft(
-            s,
+            s_WB,
             config["train"]["scales"],
             config["train"]["overlap"],
         )
@@ -119,7 +124,7 @@ for e in tqdm(range(epochs)):
 
         n_element += 1
         mean_loss += (loss.item() - mean_loss) / n_element
-        print(f'Step {step}, loss: {mean_loss}')
+        logging.info(f'Step {step}, loss: {mean_loss}')
 
 
     if not e % 10:
@@ -139,10 +144,12 @@ for e in tqdm(range(epochs)):
 
         index_s += 1
 
+logging.info("\nTraining done.")
+logging.info("Generating some training data ...")
 
-# generate some examples
+# generate some examples from train dataset
 dataloader = torch.utils.data.DataLoader(
-    dataset,
+    dataset_train,
     1,
     False,
     drop_last=True,
@@ -151,18 +158,21 @@ model.load_state_dict(torch.load(os.path.join(customPath.models(), args.NAME, "s
 model.eval()
 
 index_s = 0
-for s, p, l in dataloader:
+for s_WB, s_LB, p, l in dataloader:
     # s = s/s.max()
-    s = s.to(device)
+    s_WB = s_WB.to(device)
+    s_LB = s_LB.to(device)
     p = p.unsqueeze(-1).to(device)
     l = l.unsqueeze(-1).to(device)
 
     l = (l - mean_loudness) / std_loudness
+    if config['data']['input'] == 'LB':
+        y = model(s_LB, p, l).squeeze(-1)
+    elif config['data']['input'] == 'WB':
+        y = model(s_WB, p, l).squeeze(-1)
 
-    y = model(s, p, l).squeeze(-1)
-
-    if not index_s % 1000:
-        orig_audio = s[0].detach().cpu().numpy()
+    if not index_s % 250:
+        orig_audio = s_WB[0].detach().cpu().numpy()
         regen_audio = y[0].detach().cpu().numpy()
         sf.write(
             path.join(customPath.models(), args.NAME, f"orig_{index_s}.wav"),
@@ -176,3 +186,45 @@ for s, p, l in dataloader:
         )
 
     index_s += 1
+
+logging.info("Training data reconstructions generated.")
+
+# generate some examples from train dataset
+dataloader = torch.utils.data.DataLoader(
+    dataset_test,
+    1,
+    False,
+    drop_last=True,
+)
+
+index_s = 0
+for s_WB, s_LB, p, l in dataloader:
+    # s = s/s.max()
+    s_WB = s_WB.to(device)
+    s_LB = s_LB.to(device)
+    p = p.unsqueeze(-1).to(device)
+    l = l.unsqueeze(-1).to(device)
+
+    l = (l - mean_loudness) / std_loudness
+    if config['data']['input'] == 'LB':
+        y = model(s_LB, p, l).squeeze(-1)
+    elif config['data']['input'] == 'WB':
+        y = model(s_WB, p, l).squeeze(-1)
+
+    if not index_s % 250:
+        orig_audio = s_WB[0].detach().cpu().numpy()
+        regen_audio = y[0].detach().cpu().numpy()
+        sf.write(
+            path.join(customPath.models(), args.NAME, f"orig_{index_s}.wav"),
+            orig_audio,
+            config["preprocess"]["sampling_rate"],
+        )
+        sf.write(
+            path.join(customPath.models(), args.NAME, f"regen_{index_s}.wav"),
+            regen_audio,
+            config["preprocess"]["sampling_rate"],
+        )
+
+    index_s += 1
+
+logging.info("Training data reconstructions generated.")
