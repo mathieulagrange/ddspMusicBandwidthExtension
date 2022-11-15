@@ -1,12 +1,12 @@
 data:
-  dataset: "acc"
+  dataset: "sol"
   extension: "wav"
+  input: WB
 
 preprocess:
   sampling_rate: &samplingrate 16000
   signal_length: &signallength 64000
   block_size: &blocksize 256 # must be a power of 2 if using realtime
-
   oneshot: false # crop every audio file to exactly signal length
 
 model:
