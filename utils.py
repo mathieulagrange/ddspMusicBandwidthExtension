@@ -14,6 +14,9 @@ _PITCHES = ['C0', 'C#0', 'D0', 'D#0', 'E0', 'F0', 'F#0', 'G0', 'G#0', 'A0', 'A#0
 
 _PITCHES_MIDI_NUMBER = [i+12 for i in range(len(_PITCHES))]
 
+def filter_out_inf_then_mean(array):
+    return np.mean(array[~np.isinf(array)])
+
 def scale_function(x):
     return 2 * torch.sigmoid(x)**(math.log(10)) + 1e-7
 
