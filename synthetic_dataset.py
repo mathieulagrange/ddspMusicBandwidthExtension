@@ -26,6 +26,14 @@ def additive_synth(fs, f0, n_harmo, duration, gains_harmo):
 
     return x
 
+def pink_noise(fs, duration, n_fft = 1024):
+    n = np.random.rand(fs*duration)*2-1
+    n_stft = lr.stft(n, n_fft=n_fft)
+    for i_frame in range(n_stft.shape[1]):
+        n_stft[:, i_frame] = n_stft[:, i_frame]/np.arange(1, n_fft//2+2)
+    n = lr.istft(n_stft, n_fft=n_fft)
+    return n
+
 def asd_envelop(fs, attack, sustain, decay):
     env_attack = np.linspace(0, 1, int(fs*attack))
     env_sustain = np.ones((int(sustain*fs)))
@@ -43,7 +51,7 @@ def generate_signal(fs, f0, n_harmo, duration, attack, sustain, decay):
     elif envelop.size > fs*duration:
         envelop = envelop[:fs*duration]
 
-    n = np.random.rand(fs*duration)
+    n = pink_noise(fs, duration, n_fft=1024)
     gain_n = random()/10
 
     s = envelop*(dry_signal + gain_n*n)
@@ -68,7 +76,6 @@ if __name__ == "__main__":
             decay = round(random()*2, 2) # between 0 and 2
 
             gain = round(random()/4+0.75, 2) #between 0.75 and 1
-            gain_n = round(random()/8, 2) #between 0.75 and 1
 
             s = generate_signal(fs, f0, n_harmo, duration, attack, sustain, decay)
 
