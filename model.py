@@ -4,8 +4,6 @@ from core import mlp, gru, remove_above_nyquist, upsample
 from core import harmonic_synth, amp_to_impulse_response, fft_convolve
 from core import resample
 from modules import Z_Encoder, Decoder, HarmonicOscillator, FilteredNoise, TrainableFIRReverb
-import math
-import torchaudio
 from utils import scale_function
 import matplotlib.pyplot as plt
 
