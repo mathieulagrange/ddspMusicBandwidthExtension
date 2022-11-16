@@ -1,5 +1,4 @@
 import torch
-from torch.utils.tensorboard import SummaryWriter
 import yaml
 from model import DDSP
 from effortless_config import Config
@@ -175,12 +174,12 @@ for s_WB, s_LB, p, l in dataloader:
         orig_audio = s_WB[0].detach().cpu().numpy()
         regen_audio = y[0].detach().cpu().numpy()
         sf.write(
-            path.join(customPath.models(), args.NAME, f"orig_{index_s}.wav"),
+            path.join(customPath.models(), args.NAME, f"train_orig_{index_s}.wav"),
             orig_audio,
             config["preprocess"]["sampling_rate"],
         )
         sf.write(
-            path.join(customPath.models(), args.NAME, f"regen_{index_s}.wav"),
+            path.join(customPath.models(), args.NAME, f"train_regen_{index_s}.wav"),
             regen_audio,
             config["preprocess"]["sampling_rate"],
         )
@@ -189,7 +188,7 @@ for s_WB, s_LB, p, l in dataloader:
 
 logging.info("Training data reconstructions generated.")
 
-# generate some examples from train dataset
+# generate some examples from test dataset
 dataloader = torch.utils.data.DataLoader(
     dataset_test,
     1,
@@ -215,16 +214,16 @@ for s_WB, s_LB, p, l in dataloader:
         orig_audio = s_WB[0].detach().cpu().numpy()
         regen_audio = y[0].detach().cpu().numpy()
         sf.write(
-            path.join(customPath.models(), args.NAME, f"orig_{index_s}.wav"),
+            path.join(customPath.models(), args.NAME, f"test_orig_{index_s}.wav"),
             orig_audio,
             config["preprocess"]["sampling_rate"],
         )
         sf.write(
-            path.join(customPath.models(), args.NAME, f"regen_{index_s}.wav"),
+            path.join(customPath.models(), args.NAME, f"test_regen_{index_s}.wav"),
             regen_audio,
             config["preprocess"]["sampling_rate"],
         )
 
     index_s += 1
 
-logging.info("Training data reconstructions generated.")
+logging.info("Testing data reconstructions generated.")
