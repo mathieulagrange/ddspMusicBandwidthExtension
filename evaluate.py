@@ -25,15 +25,27 @@ def evaluate(setting, experiment):
 
     # test dataset instantiation
     if setting.data == 'sol':
-        data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed/test')
+        if setting.split == 'train':
+            data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed/train')
+        elif setting.split == 'test':
+            data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed/test')
     elif setting.data == 'tiny':
         data_dir = os.path.join(customPath.orchideaSOL_tiny(), 'preprocessed/test')
     elif setting.data == 'medley':
-        data_dir = os.path.join(customPath.medleySolosDB, 'preprocessed/test')
+        if setting.split == 'train':
+            data_dir = os.path.join(customPath.medleySolosDB, 'preprocessed/train')
+        if setting.split == 'test':
+            data_dir = os.path.join(customPath.medleySolosDB, 'preprocessed/test')
     elif setting.data == 'gtzan':
-        data_dir = os.path.join(customPath.gtzan(), 'preprocessed/test')
+        if setting.split == 'train':
+            data_dir = os.path.join(customPath.gtzan(), 'preprocessed/train')
+        elif setting.split == 'test':
+            data_dir = os.path.join(customPath.gtzan(), 'preprocessed/test')
     elif setting.data == 'synthetic':
-        data_dir = os.path.join(customPath.synthetic(), 'preprocessed/test')
+        if setting.split == 'train':
+            data_dir = os.path.join(customPath.synthetic(), 'preprocessed/train')
+        elif setting.split == 'test':
+            data_dir = os.path.join(customPath.synthetic(), 'preprocessed/test')
 
     dataset = Dataset(data_dir)
     dataloader = torch.utils.data.DataLoader(dataset, 1, False)
@@ -124,8 +136,7 @@ def evaluate(setting, experiment):
         # model name
         step = None
         if setting.data == 'sol':
-            model_name = f'bwe_sol_100harmo_{setting.n_steps_total}steps_2'
-            step = 50000
+            model_name = f'bwe_sol_100harmo_25000steps_batch32_newData'
 
         elif setting.data == 'medley':
             model_name = f'bwe_medley_100harmo_{setting.n_steps_total}steps'
@@ -133,7 +144,7 @@ def evaluate(setting, experiment):
 
         elif setting.data == 'synthetic':
             step = 10000
-            model_name = f'bwe_synth_100harmo_{step}steps'
+            model_name = f'bwe_synth_100harmo_5000steps_batch32_newData'
 
         # config file loading
         with open(os.path.join(customPath.models(), model_name, "config.yaml"), "r") as config:

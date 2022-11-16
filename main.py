@@ -20,28 +20,25 @@ experiment.set_path('output', os.path.join(customPath.results(),experiment.name,
 
 # experiment plan
 experiment.add_plan('sbr',
-    alg = ['sbr', 'oracle', 'dumb'],
+    alg = ['sbr'],#, 'oracle', 'dumb'],
     data = ['sol', 'tiny', 'medley', 'gtzan', 'synthetic'],
     method = ['replication', 'harmonic', 'replication+harmonic'],
     phase = ['oracle', 'flipped', 'noise'],
     matchingEnergy = [0.25, 0.5, 1.0],
     nfft = [1024],
-    sampling_rate = [16000]
+    sampling_rate = [16000],
+    split = ['train', 'test']
     )
 
 experiment.add_plan('ddsp',
     alg = ['ddsp'],
     data = ['sol', 'tiny', 'medley', 'gtzan', 'synthetic'],
-    batch_size = [16],
     model = ['original_autoencoder'],
     n_steps_total = [50000],
     n_steps_per_training = [5000],
-    nfft = [1024],
-    early_stop_loss_value = [None],
-    # output = ['WB', 'HB'],
-    # longTraining = [True, False],
-    # loss = ['WB', 'HB'],
-    sampling_rate = [16000]
+    sampling_rate = [16000],
+    split = ['train', 'test'],
+    nfft = [1024]
     )
 
 # experiment metrics
