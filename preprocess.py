@@ -19,7 +19,7 @@ def get_files(data_location, extension, **kwargs):
 
 
 def preprocess(f, sampling_rate, block_size, signal_length, oneshot, **kwargs):
-    x, sr = li.load(f, sampling_rate)
+    x, sr = li.load(f, sr=sampling_rate)
     x = x/np.max(np.abs(x))
     N = (signal_length - len(x) % signal_length) % signal_length
     x = np.pad(x, (0, N))
@@ -76,6 +76,9 @@ def main():
     elif config['data']['dataset'] == 'sol':
         data_location = os.path.join(customPath.orchideaSOL(),'valid')
         out_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed/valid')
+    elif config['data']['dataset'] == 'tiny':
+        data_location = os.path.join(customPath.orchideaSOL_tiny(),'test')
+        out_dir = os.path.join(customPath.orchideaSOL_tiny(), 'preprocessed/test')
 
     makedirs(out_dir, exist_ok=True)
 
@@ -95,7 +98,8 @@ def main():
         signals_WB.append(x_WB)
         pitchs.append(p)
         loudness.append(l)
-        filenames.append(str(f))
+        for i_filename in range(x_LB.shape[0]):
+            filenames.append((str(f), i_filename))
 
     signals_WB = np.concatenate(signals_WB, 0).astype(np.float32)
     signals_LB = np.concatenate(signals_LB, 0).astype(np.float32)
