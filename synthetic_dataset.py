@@ -8,6 +8,18 @@ from random import random
 from tqdm import tqdm
 from scipy.io.wavfile import write
 
+vowel_formants = {'i': [250, 2250, 3000],
+                  'y': [250, 1750, 2150],
+                  'et': [400, 2050, 2650],
+                  'u': [300, 750, 2300],
+                  'o': [350, 750, 2550],
+                  'ai': [600, 1750, 2600],
+                  'oe': [500, 1350, 2350],
+                  'eu': [350, 1350, 2250],
+                  'a': [750, 1450, 2600],
+                  'e': [550, 1550, 2550],
+                  'c_inversed': [500, 1050, 2550],
+                 }
 
 def additive_synth(fs, f0, n_harmo, duration, gains_harmo):
     # check if gains_harmo contain n_harmo gains
@@ -41,6 +53,32 @@ def asd_envelop(fs, attack, sustain, decay):
     envelop = np.concatenate((env_attack, env_sustain, env_decay))
     return envelop
 
+def add_vowel_formant(x, vowel, fs=16000, n_fft=1024, filter_width=100, formant_db = 12):
+    x_stft = lr.stft(x, n_fft=n_fft)
+    power = pow(10, formant_db/10)
+    formant_freqs = vowel_formants[vowel]
+    filter = np.ones(n_fft//2+1)
+    for freq in formant_freqs:
+        band_min = round((freq-filter_width//2)*(n_fft//2+1)/(fs//2))
+        band_max = round((freq+filter_width//2)*(n_fft//2+1)/(fs//2))
+        if band_max > fs//2:
+            raise ValueError("Upper frequency of the filter is greater than Nyquist frequency")
+        
+        bandwidth = band_max-band_min+1
+        if bandwidth % 2:
+            bandwidth = bandwidth-1
+
+        middle_point = bandwidth//2+1
+        filter[band_min:band_min+middle_point] = power*np.arange(middle_point)/(middle_point-1)+1
+        filter[band_max-middle_point:band_max] = power*np.flip(np.arange(middle_point)/(middle_point-1)+1)
+
+    filter = np.expand_dims(filter, -1)
+    x_stft_filtered = np.multiply(x_stft, filter)
+    x_filtered = lr.istft(x_stft_filtered, n_fft=n_fft)
+
+    return x_filtered, filter
+        
+
 def generate_signal(fs, f0, n_harmo, duration, attack, sustain, decay):
     gains = np.arange(1 , n_harmo+1)**2
     dry_signal = additive_synth(fs, f0, n_harmo, duration, gains)
@@ -59,7 +97,7 @@ def generate_signal(fs, f0, n_harmo, duration, attack, sustain, decay):
     return s
 
 if __name__ == "__main__":
-    path = os.path.join(customPath.dataset(), 'synthetic/train/')
+    path = os.path.join(customPath.dataset(), 'synthetic/test/')
     fs = 16000
     duration = 4
 
