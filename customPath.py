@@ -21,6 +21,15 @@ def nsynth():
 def synthetic():
     return os.path.join(dataset(), 'synthetic')
 
+def dsd():
+    return os.path.join(dataset(), 'dsd')
+
+def dsd_sources():
+    return os.path.join(dsd(), 'sources')
+
+def dsd_mixtures():
+    return os.path.join(dsd(), 'mixtures')
+
 def results():
     return os.path.join(os.getcwd(),'results', '')
 
