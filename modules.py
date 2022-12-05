@@ -19,14 +19,6 @@ class MLP(nn.Module):
                 nn.LayerNorm(normalized_shape=n_units),
                 relu(inplace=self.inplace),
             )
-        # self.add_module(
-        #     f"mlp_layer1",
-        #     nn.Sequential(
-        #         nn.Linear(n_input, n_units),
-        #         nn.LayerNorm(normalized_shape=n_units),
-        #         relu(inplace=self.inplace),
-        #     ),
-        # )
         self.mlp_layer_list = []
         for i in range(2, n_layer + 1):
             # mlp_name = f'mlp_layer{i}'
