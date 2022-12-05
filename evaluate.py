@@ -7,9 +7,9 @@ from tqdm import tqdm
 from scipy.io.wavfile import write
 import os
 import customPath
-import logging
 from math import ceil
-from model import DDSP
+from model_ddsp import DDSP
+from model_resnet import Resnet
 import torch
 from preprocess import Dataset
 import yaml
@@ -24,30 +24,62 @@ def evaluate(setting, experiment):
     tic = time.time()
 
     # test dataset instantiation
-    if setting.data == 'sol':
-        if setting.split == 'train':
-            data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed/train')
-        elif setting.split == 'test':
-            data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed/test')
-    elif setting.data == 'tiny':
-        data_dir = os.path.join(customPath.orchideaSOL_tiny(), 'preprocessed/test')
-    elif setting.data == 'medley':
-        if setting.split == 'train':
-            data_dir = os.path.join(customPath.medleySolosDB, 'preprocessed/train')
-        if setting.split == 'test':
-            data_dir = os.path.join(customPath.medleySolosDB, 'preprocessed/test')
-    elif setting.data == 'gtzan':
-        if setting.split == 'train':
-            data_dir = os.path.join(customPath.gtzan(), 'preprocessed/train')
-        elif setting.split == 'test':
-            data_dir = os.path.join(customPath.gtzan(), 'preprocessed/test')
-    elif setting.data == 'synthetic':
-        if setting.split == 'train':
-            data_dir = os.path.join(customPath.synthetic(), 'preprocessed/train')
-        elif setting.split == 'test':
-            data_dir = os.path.join(customPath.synthetic(), 'preprocessed/test')
+    if 'ddsp' in setting.model:
+        if setting.data == 'sol':
+            if setting.split == 'train':
+                data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/train')
+            elif setting.split == 'test':
+                data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/test')
+        elif setting.data == 'medley':
+            if setting.split == 'train':
+                data_dir = os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp/train')
+            if setting.split == 'test':
+                data_dir = os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp/test')
+        elif setting.data == 'gtzan':
+            if setting.split == 'train':
+                data_dir = os.path.join(customPath.gtzan(), 'preprocessed_ddsp/train')
+            elif setting.split == 'test':
+                data_dir = os.path.join(customPath.gtzan(), 'preprocessed_ddsp/test')
+        elif setting.data == 'synthetic':
+            if setting.split == 'train':
+                data_dir = os.path.join(customPath.synthetic(), 'preprocessed_ddsp/train')
+            elif setting.split == 'test':
+                data_dir = os.path.join(customPath.synthetic(), 'preprocessed_ddsp/test')
+        elif setting.data == 'dsd_sources':
+            if setting.split == 'train':
+                data_dir = os.path.join(customPath.dsd_sources(), 'preprocessed_ddsp/train')
+            elif setting.split == 'test':
+                data_dir = os.path.join(customPath.dsd_sources(), 'preprocessed_ddsp/test')
+    elif setting.model == 'resnet':
+        if setting.data == 'synthetic':
+            if setting.split == 'train':
+                data_dir = os.path.join(customPath.synthetic(), 'preprocessed_resnet/train')
+            elif setting.split == 'test':
+                data_dir = os.path.join(customPath.synthetic(), 'preprocessed_resnet/test')
+        elif setting.data == 'sol':
+            if setting.split == 'train':
+                data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed_resnet/train')
+            elif setting.split == 'test':
+                data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed_resnet/test')
+        elif setting.data == 'medley':
+            if setting.split == 'train':
+                data_dir = os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/train')
+            elif setting.split == 'test':
+                data_dir = os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/test')
+        elif setting.data == 'dsd_sources':
+            if setting.split == 'train':
+                data_dir = os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/train')
+            elif setting.split == 'test':
+                data_dir = os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/test')
 
-    dataset = Dataset(data_dir)
+
+    if setting.alg == 'ddsp':
+        if setting.model == 'ddsp_original_autoencoder':
+            dataset = Dataset(data_dir, model='ddsp')
+        elif setting.model == 'resnet':
+            dataset = Dataset(data_dir, model='resnet')
+    else:
+        dataset = Dataset(data_dir, model='ddsp')
     dataloader = torch.utils.data.DataLoader(dataset, 1, False)
     
     # prepare metrics for each example
@@ -135,43 +167,79 @@ def evaluate(setting, experiment):
         ### DDSP ALGO ###               
         # model name
         step = None
-        if setting.data == 'sol':
-            model_name = f'bwe_sol_100harmo_25000steps_batch32_newData'
+        if setting.model == 'ddsp_original_autoencoder':
+            if setting.data == 'sol':
+                if setting.loss == 'WB':
+                    model_name = 'bwe_sol_100harmo_25000steps_batch32_lossWB'
+                else:
+                    model_name = 'bwe_sol_100harmo_25000steps_batch32_lossHB'
 
-        elif setting.data == 'medley':
-            model_name = f'bwe_medley_100harmo_{setting.n_steps_total}steps'
-            step = 50000
+            elif setting.data == 'medley':
+                if setting.loss == 'WB':
+                    model_name = 'bwe_medley_100harmo_25000steps_batch32_lossWB'
+                elif setting.loss == 'HB':
+                    model_name = 'bwe_medley_100harmo_25000steps_batch32_lossHB'
 
-        elif setting.data == 'synthetic':
-            step = 10000
-            model_name = f'bwe_synth_100harmo_5000steps_batch32_newData'
+            elif setting.data == 'synthetic':
+                if setting.loss == 'WB':
+                    model_name = 'bwe_synth_100harmo_5000steps_batch32_lossWB'
+                else:
+                    model_name = 'bwe_synth_100harmo_5000steps_batch32_lossHB'
+
+            elif setting.data == 'dsd_sources':
+                if setting.loss == 'WB':
+                    model_name = 'bwe_dsd_sources_100harmo_25000steps_batch32_lossWB'
+                elif setting.loss == 'HB':
+                    model_name = 'bwe_dsd_sources_100harmo_25000steps_batch32_lossHB_3'
+
+        elif setting.model == 'resnet':
+            if setting.data == 'synthetic':
+                model_name = 'bwe_synth_resnet_64000steps_batch16'
+            elif setting.data == 'sol':
+                model_name = 'bwe_sol_resnet_64000steps_batch8'
+            elif setting.data == 'medley':
+                model_name = 'bwe_medley_resnet_250000steps_batch16'
+            elif setting.data == 'dsd_sources':
+                model_name = 'bwe_dsd_sources_resnet_250000steps_batch8'
+        
 
         # config file loading
         with open(os.path.join(customPath.models(), model_name, "config.yaml"), "r") as config:
             config = yaml.safe_load(config)
         
         # load model
-        if setting.model == 'original_autoencoder':
+        if setting.model == 'ddsp_original_autoencoder':
             model = DDSP(**config["model"])
             model.load_state_dict(torch.load(os.path.join(customPath.models(), model_name, "state.pth"), map_location=torch.device('cpu')))
             model.eval()
+            mean_loudness = config["data"]["mean_loudness"]
+            std_loudness = config["data"]["std_loudness"]
+        elif setting.model == 'resnet':
+            model = model = Resnet()
+            model.load_state_dict(torch.load(os.path.join(customPath.models(), model_name, "state.pth"), map_location=torch.device('cpu')))
+            model.eval()
 
-        mean_loudness = config["data"]["mean_loudness"]
-        std_loudness = config["data"]["std_loudness"]
 
         print('Trained model loaded.')
 
         print('Evaluation on the whole test set ...')
         for i_batch, batch in tqdm(enumerate(dataloader)):
             # output generation from the ddsp model
-            s_WB, s_LB, p, l = batch
-            s_WB = s_WB.to(device)
-            s_LB = s_LB.to(device)
-            p = p.unsqueeze(-1).to(device)
-            l = l.unsqueeze(-1).to(device)
-            l = (l - mean_loudness) / std_loudness
-
-            y = model(s_LB, p, l).squeeze(-1)
+            if 'ddsp' in setting.model:
+                s_WB, s_LB, p, l = batch
+                s_WB = s_WB.to(device)
+                s_LB = s_LB.to(device)
+                p = p.unsqueeze(-1).to(device)
+                l = l.unsqueeze(-1).to(device)
+                l = (l - mean_loudness) / std_loudness
+                y = model(s_LB, p, l).squeeze(-1)
+            
+            elif setting.model == 'resnet':
+                s_WB, s_LB = batch
+                s_WB = s_WB.unsqueeze(1).to(device)
+                s_LB = s_LB.unsqueeze(1).to(device)
+                y = model(s_LB)[0]
+                s_WB = s_WB[0]
 
             # reconstructed signal + recontructed stft
             reconstructed_audio = y[0].detach().cpu().numpy()
