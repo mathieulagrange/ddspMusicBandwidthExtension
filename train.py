@@ -39,39 +39,82 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 os.makedirs(path.join(customPath.models(), args.NAME), exist_ok=True)
 logging.basicConfig(filename=os.path.join(customPath.models(), args.NAME, 'training.log'), level=logging.INFO, format='%(name)s - %(asctime)s - %(message)s')
 
+if config['preprocess']['sampling_rate'] == 16000:
+    if config['train']['model'] == 'ddsp':
+        if args.DATASET == "synthetic":
+            dataset_train = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_ddsp/train'), model='ddsp')
+            dataset_test = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_ddsp/test'), model='ddsp')
+        elif args.DATASET == "sol":
+            dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/train'), model='ddsp')
+            dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/test'), model='ddsp')
+        elif args.DATASET == "medley":
+            dataset_train = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp/train'), model='ddsp')
+            dataset_test = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp/test'), model='ddsp')
+        elif args.DATASET == "dsd_sources":
+            dataset_train = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_ddsp/train'), model='ddsp')
+            dataset_test = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_ddsp/test'), model='ddsp')
+        elif args.DATASET == "dsd_mixtures":
+            dataset_train = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_ddsp/train'), model='ddsp')
+            dataset_test = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_ddsp/test'), model='ddsp')
 
-if config['train']['model'] == 'ddsp':
-    if args.DATASET == "synthetic":
-        dataset_train = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_ddsp/train'), model='ddsp')
-        dataset_test = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_ddsp/test'), model='ddsp')
-    elif args.DATASET == "sol":
-        dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/train'), model='ddsp')
-        dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/test'), model='ddsp')
-    elif args.DATASET == "medley":
-        dataset_train = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp/train'), model='ddsp')
-        dataset_test = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp/test'), model='ddsp')
-    elif args.DATASET == "dsd_sources":
-        dataset_train = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_ddsp/train'), model='ddsp')
-        dataset_test = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_ddsp/test'), model='ddsp')
+        model = DDSP(**config["model"]).to(device)
 
-    model = DDSP(**config["model"]).to(device)
+    elif config['train']['model'] == 'resnet':
+        if args.DATASET == "synthetic":
+            dataset_train = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_resnet/train'), model='resnet')
+            dataset_test = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_resnet/test'), model='resnet')
+        elif args.DATASET == "sol":
+            dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/train'), model='resnet')
+            dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/test'), model='resnet')
+        elif args.DATASET == "medley":
+            dataset_train = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/train'), model='resnet')
+            dataset_test = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/test'), model='resnet')
+        elif args.DATASET == "dsd_sources":
+            dataset_train = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/train'), model='resnet')
+            dataset_test = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/test'), model='resnet')
+        elif args.DATASET == "dsd_mixtures":
+            dataset_train = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet/train'), model='resnet')
+            dataset_test = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet/test'), model='resnet')
 
-elif config['train']['model'] == 'resnet':
-    if args.DATASET == "synthetic":
-        dataset_train = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_resnet/train'), model='resnet')
-        dataset_test = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_resnet/test'), model='resnet')
-    elif args.DATASET == "sol":
-        dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/train'), model='resnet')
-        dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/test'), model='resnet')
-    elif args.DATASET == "medley":
-        dataset_train = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/train'), model='resnet')
-        dataset_test = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/test'), model='resnet')
-    elif args.DATASET == "dsd_sources":
-        dataset_train = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/train'), model='resnet')
-        dataset_test = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/test'), model='resnet')
+        model = Resnet().to(device)
 
+elif config['preprocess']['sampling_rate'] == 8000:
+    if config['train']['model'] == 'ddsp':
+        if args.DATASET == "synthetic":
+            dataset_train = Dataset(os.path.join(customPath.synthetic(), '8000', 'preprocessed_ddsp/train'), model='ddsp')
+            dataset_test = Dataset(os.path.join(customPath.synthetic(), '8000', 'preprocessed_ddsp/test'), model='ddsp')
+        elif args.DATASET == "sol":
+            dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), '8000', 'preprocessed_ddsp/train'), model='ddsp')
+            dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), '8000', 'preprocessed_ddsp/test'), model='ddsp')
+        elif args.DATASET == "medley":
+            dataset_train = Dataset(os.path.join(customPath.medleySolosDB(), '8000', 'preprocessed_ddsp/train'), model='ddsp')
+            dataset_test = Dataset(os.path.join(customPath.medleySolosDB(), '8000', 'preprocessed_ddsp/test'), model='ddsp')
+        elif args.DATASET == "dsd_sources":
+            dataset_train = Dataset(os.path.join(customPath.dsd_sources(), '8000', 'preprocessed_ddsp/train'), model='ddsp')
+            dataset_test = Dataset(os.path.join(customPath.dsd_sources(), '8000', 'preprocessed_ddsp/test'), model='ddsp')
+        elif args.DATASET == "dsd_mixtures":
+            dataset_train = Dataset(os.path.join(customPath.dsd_mixtures(), '8000', 'preprocessed_ddsp/train'), model='ddsp')
+            dataset_test = Dataset(os.path.join(customPath.dsd_mixtures(), '8000', 'preprocessed_ddsp/test'), model='ddsp')
 
-    model = Resnet().to(device)
+        model = DDSP(**config["model"]).to(device)
+
+    elif config['train']['model'] == 'resnet':
+        if args.DATASET == "synthetic":
+            dataset_train = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_resnet/train'), model='resnet')
+            dataset_test = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_resnet/test'), model='resnet')
+        elif args.DATASET == "sol":
+            dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/train'), model='resnet')
+            dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/test'), model='resnet')
+        elif args.DATASET == "medley":
+            dataset_train = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/train'), model='resnet')
+            dataset_test = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/test'), model='resnet')
+        elif args.DATASET == "dsd_sources":
+            dataset_train = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/train'), model='resnet')
+            dataset_test = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/test'), model='resnet')
+        elif args.DATASET == "dsd_mixtures":
+            dataset_train = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet/train'), model='resnet')
+            dataset_test = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet/test'), model='resnet')
+
 
 dataloader = torch.utils.data.DataLoader(
     dataset_train,
