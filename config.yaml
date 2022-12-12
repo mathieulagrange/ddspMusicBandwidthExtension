@@ -1,8 +1,8 @@
 data:
-  dataset: "sol"
+  dataset: "tiny"
   extension: "wav"
-  input: WB
-
+  input: LB
+  
 preprocess:
   sampling_rate: &samplingrate 16000
   signal_length: &signallength 64000
@@ -18,5 +18,8 @@ model:
   device: cpu
 
 train:
+  model: "resnet"
   scales: [2048, 1024, 512, 256, 128, 64]
   overlap: .75
+  batch: 32
+  HF: False
