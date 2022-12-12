@@ -19,7 +19,7 @@ experiment.set_path('output', os.path.join(customPath.results(),experiment.name,
 
 # experiment plan
 experiment.add_plan('sbr',
-    data = ['synthetic', 'sol', 'tiny', 'medley', 'dsd_sources', 'gtzan'],
+    data = ['synthetic', 'sol', 'medley', 'dsd_sources', 'dsd_mixtures'],
     alg = ['sbr'],#, 'oracle', 'dumb'],
     method = ['replication'],#, 'harmonic', 'replication+harmonic'],
     phase = ['oracle'],#, 'flipped', 'noise'],
@@ -30,28 +30,28 @@ experiment.add_plan('sbr',
     )
 
 experiment.add_plan('ddsp',
-    data = ['synthetic', 'sol', 'tiny', 'medley', 'dsd_sources', 'gtzan'],
+    data = ['synthetic', 'sol', 'medley', 'dsd_sources', 'dsd_mixtures'],
     alg = ['ddsp'],
     model = ['ddsp_original_autoencoder', 'resnet'],
     n_steps_total = [50000],
     n_steps_per_training = [5000],
-    sampling_rate = [16000],
+    sampling_rate = [8000, 16000],
     split = ['train', 'test'],
     nfft = [1024],
-    loss = ['WB', 'HB']
+    loss = ['WB', 'HB'],
     )
 
 # experiment metrics
-experiment.set_metric(
-    name = 'sdr',
-    # significance = True,
-    higher_the_better = True,
-    func = filter_out_inf_then_mean
-)
+# experiment.set_metric(
+#     name = 'sdr',
+#     # significance = True,
+#     higher_the_better = True,
+#     func = filter_out_inf_then_mean
+# )
 
 experiment.set_metric(
     name = 'lsd',
-    # significance = True,
+    significance = True,
     lower_the_better = True
 )
 
