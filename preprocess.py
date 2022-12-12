@@ -13,7 +13,6 @@ import customPath
 import os
 import pickle
 
-
 def get_files(data_location, extension, **kwargs):
     return list(pathlib.Path(data_location).rglob(f"*.{extension}"))
 
@@ -80,25 +79,46 @@ def main():
         config = yaml.safe_load(config)
 
     model = config['train']['model']
-    if config['data']['dataset'] == 'synthetic':
-        data_location = os.path.join(customPath.synthetic(),'valid')
-        out_dir = os.path.join(customPath.synthetic(), f'preprocessed_{model}/valid')
-    elif config['data']['dataset'] == 'sol':
-        data_location = os.path.join(customPath.orchideaSOL(),'test')
-        out_dir = os.path.join(customPath.orchideaSOL(), f'preprocessed_{model}/test')
-    elif config['data']['dataset'] == 'tiny':
-        data_location = os.path.join(customPath.orchideaSOL_tiny(),'test')
-        out_dir = os.path.join(customPath.orchideaSOL_tiny(), f'preprocessed_{model}/test')
-    elif config['data']['dataset'] == 'medley':
-        data_location = os.path.join(customPath.medleySolosDB(),'train')
-        out_dir = os.path.join(customPath.medleySolosDB(), f'preprocessed_{model}/train')
-    elif config['data']['dataset'] == 'dsd_sources':
-        data_location = os.path.join(customPath.dsd_sources(),'train')
-        out_dir = os.path.join(customPath.dsd_sources(), f'preprocessed_{model}/train')
-    elif config['data']['dataset'] == 'dsd_mixtures':
-        data_location = os.path.join(customPath.dsd_mixtures(),'train')
-        out_dir = os.path.join(customPath.dsd_mixtures(), f'preprocessed_{model}/train')
 
+    if config['preprocess']['samling_rate'] == 16000:
+        if config['data']['dataset'] == 'synthetic':
+            data_location = os.path.join(customPath.synthetic(),'test')
+            out_dir = os.path.join(customPath.synthetic(), f'preprocessed_{model}/test')
+        elif config['data']['dataset'] == 'sol':
+            data_location = os.path.join(customPath.orchideaSOL(),'test')
+            out_dir = os.path.join(customPath.orchideaSOL(), f'preprocessed_{model}/test')
+        elif config['data']['dataset'] == 'tiny':
+            data_location = os.path.join(customPath.orchideaSOL_tiny(),'test')
+            out_dir = os.path.join(customPath.orchideaSOL_tiny(), f'preprocessed_{model}/test')
+        elif config['data']['dataset'] == 'medley':
+            data_location = os.path.join(customPath.medleySolosDB(),'train')
+            out_dir = os.path.join(customPath.medleySolosDB(), f'preprocessed_{model}/train')
+        elif config['data']['dataset'] == 'dsd_sources':
+            data_location = os.path.join(customPath.dsd_sources(),'train')
+            out_dir = os.path.join(customPath.dsd_sources(), f'preprocessed_{model}/train')
+        elif config['data']['dataset'] == 'dsd_mixtures':
+            data_location = os.path.join(customPath.dsd_mixtures(),'train')
+            out_dir = os.path.join(customPath.dsd_mixtures(), f'preprocessed_{model}/train')
+
+    elif config['preprocess']['sampling_rate'] == 8000:
+        if config['data']['dataset'] == 'synthetic':
+            data_location = os.path.join(customPath.synthetic(), '8000', 'test')
+            out_dir = os.path.join(customPath.synthetic(), '8000', f'preprocessed_{model}/test')
+        elif config['data']['dataset'] == 'sol':
+            data_location = os.path.join(customPath.orchideaSOL(), '8000', 'test')
+            out_dir = os.path.join(customPath.orchideaSOL(), '8000', f'preprocessed_{model}/test')
+        elif config['data']['dataset'] == 'tiny':
+            data_location = os.path.join(customPath.orchideaSOL_tiny(), '8000', 'test')
+            out_dir = os.path.join(customPath.orchideaSOL_tiny(), '8000', f'preprocessed_{model}/test')
+        elif config['data']['dataset'] == 'medley':
+            data_location = os.path.join(customPath.medleySolosDB(), '8000', 'train')
+            out_dir = os.path.join(customPath.medleySolosDB(), '8000', f'preprocessed_{model}/train')
+        elif config['data']['dataset'] == 'dsd_sources':
+            data_location = os.path.join(customPath.dsd_sources(), '8000', 'train')
+            out_dir = os.path.join(customPath.dsd_sources(), '8000', f'preprocessed_{model}/train')
+        elif config['data']['dataset'] == 'dsd_mixtures':
+            data_location = os.path.join(customPath.dsd_mixtures(),'8000', 'train')
+            out_dir = os.path.join(customPath.dsd_mixtures(), '8000', f'preprocessed_{model}/train')
 
     makedirs(out_dir, exist_ok=True)
 
