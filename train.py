@@ -1,6 +1,6 @@
 import torch
 import yaml
-from model_ddsp import DDSP
+from model_ddsp import DDSP, DDSPNonHarmonic
 from model_resnet import Resnet
 from effortless_config import Config
 from os import path
@@ -40,10 +40,13 @@ os.makedirs(path.join(customPath.models(), args.NAME), exist_ok=True)
 logging.basicConfig(filename=os.path.join(customPath.models(), args.NAME, 'training.log'), level=logging.INFO, format='%(name)s - %(asctime)s - %(message)s')
 
 if config['preprocess']['sampling_rate'] == 16000:
-    if config['train']['model'] == 'ddsp':
+    if 'ddsp' in config['train']['model']:
         if args.DATASET == "synthetic":
             dataset_train = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_ddsp/train'), model='ddsp')
             dataset_test = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_ddsp/test'), model='ddsp')
+        elif args.DATASET == "synthetic_crepe":
+            dataset_train = Dataset(os.path.join(customPath.synthetic_crepe(), 'preprocessed_ddsp/train'), model='ddsp')
+            dataset_test = Dataset(os.path.join(customPath.synthetic_crepe(), 'preprocessed_ddsp/test'), model='ddsp')
         elif args.DATASET == "sol":
             dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/train'), model='ddsp')
             dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/test'), model='ddsp')
@@ -57,7 +60,10 @@ if config['preprocess']['sampling_rate'] == 16000:
             dataset_train = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_ddsp/train'), model='ddsp')
             dataset_test = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_ddsp/test'), model='ddsp')
 
-        model = DDSP(**config["model"]).to(device)
+        if config['train']['model'] == 'ddsp':
+            model = DDSP(**config["model"]).to(device)
+        elif config['train']['model'] == 'ddsp_non_harmo':
+            model = DDSPNonHarmonic(**config["model"]).to(device)
 
     elif config['train']['model'] == 'resnet':
         if args.DATASET == "synthetic":
@@ -79,10 +85,13 @@ if config['preprocess']['sampling_rate'] == 16000:
         model = Resnet().to(device)
 
 elif config['preprocess']['sampling_rate'] == 8000:
-    if config['train']['model'] == 'ddsp':
+    if 'ddsp' in config['train']['model']:
         if args.DATASET == "synthetic":
             dataset_train = Dataset(os.path.join(customPath.synthetic(), '8000', 'preprocessed_ddsp/train'), model='ddsp')
             dataset_test = Dataset(os.path.join(customPath.synthetic(), '8000', 'preprocessed_ddsp/test'), model='ddsp')
+        elif args.DATASET == "synthetic_crepe":
+            dataset_train = Dataset(os.path.join(customPath.synthetic_crepe(), '8000', 'preprocessed_ddsp/train'), model='ddsp')
+            dataset_test = Dataset(os.path.join(customPath.synthetic_crepe(), '8000', 'preprocessed_ddsp/test'), model='ddsp')
         elif args.DATASET == "sol":
             dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), '8000', 'preprocessed_ddsp/train'), model='ddsp')
             dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), '8000', 'preprocessed_ddsp/test'), model='ddsp')
@@ -96,7 +105,10 @@ elif config['preprocess']['sampling_rate'] == 8000:
             dataset_train = Dataset(os.path.join(customPath.dsd_mixtures(), '8000', 'preprocessed_ddsp/train'), model='ddsp')
             dataset_test = Dataset(os.path.join(customPath.dsd_mixtures(), '8000', 'preprocessed_ddsp/test'), model='ddsp')
 
-        model = DDSP(**config["model"]).to(device)
+        if config['train']['model'] == 'ddsp':
+            model = DDSP(**config["model"]).to(device)
+        elif config['train']['model'] == 'ddsp_non_harmo':
+            model = DDSPNonHarmonic(**config["model"]).to(device)
 
     elif config['train']['model'] == 'resnet':
         if args.DATASET == "synthetic":
@@ -115,6 +127,7 @@ elif config['preprocess']['sampling_rate'] == 8000:
             dataset_train = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet/train'), model='resnet')
             dataset_test = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet/test'), model='resnet')
 
+        model = Resnet().to(device)
 
 dataloader = torch.utils.data.DataLoader(
     dataset_train,
@@ -123,7 +136,7 @@ dataloader = torch.utils.data.DataLoader(
     drop_last=True,
 )
 
-if config['train']['model'] == 'ddsp':
+if 'ddsp' in config['train']['model']:
     mean_loudness, std_loudness = mean_std_loudness(dataloader)
     config["data"]["mean_loudness"] = mean_loudness
     config["data"]["std_loudness"] = std_loudness
@@ -131,7 +144,7 @@ if config['train']['model'] == 'ddsp':
 with open(path.join(customPath.models(), args.NAME, "config.yaml"), "w") as out_config:
     yaml.safe_dump(config, out_config)
 
-if config['train']['model'] == 'ddsp':
+if 'ddsp' in config['train']['model']:
     opt = torch.optim.Adam(model.parameters(), lr=args.START_LR)
 elif config['train']['model'] == 'resnet':
     opt = torch.optim.Adam(model.parameters(), lr=0.0005)
@@ -159,7 +172,7 @@ first_check_plateau = True
 for e in tqdm(range(epochs)):
     index_s = 0
     for batch in dataloader:
-        if config['train']['model'] == 'ddsp':
+        if 'ddsp' in config['train']['model']:
             s_WB, s_LB, p, l = batch
             s_WB = s_WB.to(device)
             s_LB = s_LB.to(device)
