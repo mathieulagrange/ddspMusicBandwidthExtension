@@ -80,10 +80,13 @@ def main():
 
     model = config['train']['model']
 
-    if config['preprocess']['samling_rate'] == 16000:
+    if config['preprocess']['sampling_rate'] == 16000:
         if config['data']['dataset'] == 'synthetic':
             data_location = os.path.join(customPath.synthetic(),'test')
             out_dir = os.path.join(customPath.synthetic(), f'preprocessed_{model}/test')
+        elif config['data']['dataset'] == 'synthetic_crepe':
+            data_location = os.path.join(customPath.synthetic_crepe(),'train')
+            out_dir = os.path.join(customPath.synthetic_crepe(), f'preprocessed_{model}/train')
         elif config['data']['dataset'] == 'sol':
             data_location = os.path.join(customPath.orchideaSOL(),'test')
             out_dir = os.path.join(customPath.orchideaSOL(), f'preprocessed_{model}/test')
@@ -104,6 +107,9 @@ def main():
         if config['data']['dataset'] == 'synthetic':
             data_location = os.path.join(customPath.synthetic(), '8000', 'test')
             out_dir = os.path.join(customPath.synthetic(), '8000', f'preprocessed_{model}/test')
+        elif config['data']['dataset'] == 'synthetic_crepe':
+            data_location = os.path.join(customPath.synthetic_crepe(), '8000', 'train')
+            out_dir = os.path.join(customPath.synthetic_crepe(), '8000', f'preprocessed_{model}/train')
         elif config['data']['dataset'] == 'sol':
             data_location = os.path.join(customPath.orchideaSOL(), '8000', 'test')
             out_dir = os.path.join(customPath.orchideaSOL(), '8000', f'preprocessed_{model}/test')

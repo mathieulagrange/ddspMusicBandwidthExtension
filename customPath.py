@@ -21,6 +21,10 @@ def nsynth():
 def synthetic():
     return os.path.join(dataset(), 'synthetic')
 
+def synthetic_crepe():
+    return os.path.join(dataset(), 'synthetic_crepe')
+
+
 def dsd():
     return os.path.join(dataset(), 'dsd')
 

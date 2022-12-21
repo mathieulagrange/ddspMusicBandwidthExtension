@@ -24,64 +24,135 @@ def evaluate(setting, experiment):
     tic = time.time()
 
     # test dataset instantiation
-    if not hasattr(setting, 'model') or 'ddsp' in setting.model:
-        if setting.data == 'sol':
-            if setting.split == 'train':
-                data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/train')
-            elif setting.split == 'test':
-                data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/test')
-        elif setting.data == 'medley':
-            if setting.split == 'train':
-                data_dir = os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp/train')
-            if setting.split == 'test':
-                data_dir = os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp/test')
-        elif setting.data == 'gtzan':
-            if setting.split == 'train':
-                data_dir = os.path.join(customPath.gtzan(), 'preprocessed_ddsp/train')
-            elif setting.split == 'test':
-                data_dir = os.path.join(customPath.gtzan(), 'preprocessed_ddsp/test')
-        elif setting.data == 'synthetic':
-            if setting.split == 'train':
-                data_dir = os.path.join(customPath.synthetic(), 'preprocessed_ddsp/train')
-            elif setting.split == 'test':
-                data_dir = os.path.join(customPath.synthetic(), 'preprocessed_ddsp/test')
-        elif setting.data == 'dsd_sources':
-            if setting.split == 'train':
-                data_dir = os.path.join(customPath.dsd_sources(), 'preprocessed_ddsp/train')
-            elif setting.split == 'test':
-                data_dir = os.path.join(customPath.dsd_sources(), 'preprocessed_ddsp/test')
-        elif setting.data == 'dsd_mixtures':
-            if setting.split == 'train':
-                data_dir = os.path.join(customPath.dsd_mixtures(), 'preprocessed_ddsp/train')
-            elif setting.split == 'test':
-                data_dir = os.path.join(customPath.dsd_mixtures(), 'preprocessed_ddsp/test')
+    if setting.sampling_rate == 16000:
+        if not hasattr(setting, 'model') or 'ddsp' in setting.model:
+            if setting.data == 'sol':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/test')
+            elif setting.data == 'medley':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp/train')
+                if setting.split == 'test':
+                    data_dir = os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp/test')
+            elif setting.data == 'gtzan':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.gtzan(), 'preprocessed_ddsp/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.gtzan(), 'preprocessed_ddsp/test')
+            elif setting.data == 'synthetic':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.synthetic(), 'preprocessed_ddsp/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.synthetic(), 'preprocessed_ddsp/test')
+            elif setting.data == 'synthetic_crepe':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.synthetic_crepe(), 'preprocessed_ddsp/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.synthetic_crepe(), 'preprocessed_ddsp/test')
+            elif setting.data == 'dsd_sources':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.dsd_sources(), 'preprocessed_ddsp/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.dsd_sources(), 'preprocessed_ddsp/test')
+            elif setting.data == 'dsd_mixtures':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.dsd_mixtures(), 'preprocessed_ddsp/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.dsd_mixtures(), 'preprocessed_ddsp/test')
 
-    elif setting.model == 'resnet':
-        if setting.data == 'synthetic':
-            if setting.split == 'train':
-                data_dir = os.path.join(customPath.synthetic(), 'preprocessed_resnet/train')
-            elif setting.split == 'test':
-                data_dir = os.path.join(customPath.synthetic(), 'preprocessed_resnet/test')
-        elif setting.data == 'sol':
-            if setting.split == 'train':
-                data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed_resnet/train')
-            elif setting.split == 'test':
-                data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed_resnet/test')
-        elif setting.data == 'medley':
-            if setting.split == 'train':
-                data_dir = os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/train')
-            elif setting.split == 'test':
-                data_dir = os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/test')
-        elif setting.data == 'dsd_sources':
-            if setting.split == 'train':
-                data_dir = os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/train')
-            elif setting.split == 'test':
-                data_dir = os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/test')
-        elif setting.data == 'dsd_mixtures':
-            if setting.split == 'train':
-                data_dir = os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet/train')
-            elif setting.split == 'test':
-                data_dir = os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet/test')
+        elif setting.model == 'resnet':
+            if setting.data == 'synthetic':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.synthetic(), 'preprocessed_resnet/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.synthetic(), 'preprocessed_resnet/test')
+            elif setting.data == 'sol':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed_resnet/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.orchideaSOL(), 'preprocessed_resnet/test')
+            elif setting.data == 'medley':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/test')
+            elif setting.data == 'dsd_sources':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/test')
+            elif setting.data == 'dsd_mixtures':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet/test')
+
+    elif setting.sampling_rate == 8000:
+        if not hasattr(setting, 'model') or 'ddsp' in setting.model:
+            if setting.data == 'sol':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.orchideaSOL(), '8000', 'preprocessed_ddsp/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.orchideaSOL(), '8000', 'preprocessed_ddsp/test')
+            elif setting.data == 'medley':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.medleySolosDB(), '8000', 'preprocessed_ddsp/train')
+                if setting.split == 'test':
+                    data_dir = os.path.join(customPath.medleySolosDB(), '8000', 'preprocessed_ddsp/test')
+            elif setting.data == 'gtzan':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.gtzan(), '8000', 'preprocessed_ddsp/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.gtzan(), '8000', 'preprocessed_ddsp/test')
+            elif setting.data == 'synthetic':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.synthetic(), '8000', 'preprocessed_ddsp/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.synthetic(), '8000', 'preprocessed_ddsp/test')
+            elif setting.data == 'synthetic_crepe':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.synthetic_crepe(), '8000', 'preprocessed_ddsp/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.synthetic_crepe(), '8000', 'preprocessed_ddsp/test')
+            elif setting.data == 'dsd_sources':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.dsd_sources(), '8000', 'preprocessed_ddsp/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.dsd_sources(), '8000', 'preprocessed_ddsp/test')
+            elif setting.data == 'dsd_mixtures':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.dsd_mixtures(), '8000', 'preprocessed_ddsp/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.dsd_mixtures(), '8000', 'preprocessed_ddsp/test')
+
+        elif setting.model == 'resnet':
+            if setting.data == 'synthetic':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.synthetic(), '8000', 'preprocessed_resnet/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.synthetic(), '8000', 'preprocessed_resnet/test')
+            elif setting.data == 'sol':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.orchideaSOL(), '8000', 'preprocessed_resnet/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.orchideaSOL(), '8000', 'preprocessed_resnet/test')
+            elif setting.data == 'medley':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.medleySolosDB(), '8000', 'preprocessed_resnet/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.medleySolosDB(), '8000', 'preprocessed_resnet/test')
+            elif setting.data == 'dsd_sources':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.dsd_sources(), '8000', 'preprocessed_resnet/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.dsd_sources(), '8000', 'preprocessed_resnet/test')
+            elif setting.data == 'dsd_mixtures':
+                if setting.split == 'train':
+                    data_dir = os.path.join(customPath.dsd_mixtures(), '8000', 'preprocessed_resnet/train')
+                elif setting.split == 'test':
+                    data_dir = os.path.join(customPath.dsd_mixtures(), '8000', 'preprocessed_resnet/test')
 
 
     if setting.alg == 'ddsp':
@@ -114,10 +185,25 @@ def evaluate(setting, experiment):
 
         for i, test_data in tqdm(enumerate(dataloader)):
             if setting.data == 'synthetic':
-                if not hasattr(setting, 'model') or setting.model == 'ddsp_original_autoencoder':
-                    filename_idx = dataset.filenames[i].split('/')[-1][:-4]
-                    chunk_idx = 0
-                elif setting.model == 'resnet':
+                if setting.sampling_rate == 16000:
+                    if not hasattr(setting, 'model') or setting.model == 'ddsp_original_autoencoder':
+                        filename_idx = dataset.filenames[i].split('/')[-1][:-4]
+                        chunk_idx = 0
+                    elif setting.model == 'resnet':
+                        filename_idx = dataset.filenames[i][0].split('/')[-1][:-4]
+                        chunk_idx = dataset.filenames[i][1]
+                elif setting.sampling_rate == 8000:
+                    filename_idx = dataset.filenames[i][0].split('/')[-1][:-4]
+                    chunk_idx = dataset.filenames[i][1]
+            elif setting.data == 'synthetic_crepe':
+                if setting.sampling_rate == 16000:
+                    if not hasattr(setting, 'model') or setting.model == 'ddsp_original_autoencoder':
+                        filename_idx = dataset.filenames[i].split('/')[-1][:-4]
+                        chunk_idx = 0
+                    elif setting.model == 'resnet':
+                        filename_idx = dataset.filenames[i][0].split('/')[-1][:-4]
+                        chunk_idx = dataset.filenames[i][1]
+                elif setting.sampling_rate == 8000:
                     filename_idx = dataset.filenames[i][0].split('/')[-1][:-4]
                     chunk_idx = dataset.filenames[i][1]
             elif setting.data == 'sol':
@@ -251,19 +337,24 @@ def evaluate(setting, experiment):
             if setting.model == 'ddsp_original_autoencoder':
                 if setting.data == 'synthetic':
                     if setting.loss == 'WB':
-                        model_name = 'bwe_synth_8000_100harmo_5000steps_batch32_lossWB'
+                        model_name = 'bwe_synth_100harmo_5000steps_batch32_lossWB'
                     else:
-                        model_name = 'bwe_synth_8000_100harmo_5000steps_batch32_lossHB'
+                        model_name = 'bwe_synth_100harmo_5000steps_batch32_lossHB'
+                if setting.data == 'synthetic_crepe':
+                    if setting.loss == 'WB':
+                        model_name = 'bwe_synth_crepe_100harmo_5000steps_batch32_lossWB'
+                    else:
+                        model_name = 'bwe_synth_crepe_100harmo_5000steps_batch32_lossHB'
                 elif setting.data == 'sol':
                     if setting.loss == 'WB':
-                        model_name = 'bwe_sol_8000_100harmo_25000steps_batch32_lossWB'
+                        model_name = 'bwe_sol_100harmo_25000steps_batch32_lossWB'
                     else:
-                        model_name = 'bwe_sol_8000_100harmo_25000steps_batch32_lossHB'
+                        model_name = 'bwe_sol_100harmo_25000steps_batch32_lossHB'
                 elif setting.data == 'medley':
                     if setting.loss == 'WB':
-                        model_name = 'bwe_medley_8000_100harmo_25000steps_batch32_lossWB'
+                        model_name = 'bwe_medley_100harmo_25000steps_batch32_lossWB'
                     elif setting.loss == 'HB':
-                        model_name = 'bwe_medley_8000_100harmo_25000steps_batch32_lossHB'
+                        model_name = 'bwe_medley_100harmo_25000steps_batch32_lossHB'
                 elif setting.data == 'dsd_sources':
                     if setting.loss == 'WB':
                         model_name = 'bwe_dsd_sources_100harmo_25000steps_batch32_lossWB'
@@ -274,7 +365,6 @@ def evaluate(setting, experiment):
                         model_name = 'bwe_dsd_mixtures_100harmo_25000steps_batch32_lossWB'
                     elif setting.loss == 'HB':
                         model_name = 'bwe_dsd_mixtures_100harmo_25000steps_batch32_lossHB'
-
             elif setting.model == 'resnet':
                 if setting.data == 'synthetic':
                     model_name = 'bwe_synth_resnet_64000steps_batch16'
@@ -291,29 +381,45 @@ def evaluate(setting, experiment):
             if setting.model == 'ddsp_original_autoencoder':
                 if setting.data == 'sol':
                     if setting.loss == 'WB':
-                        model_name = 'bwe_sol_100harmo_25000steps_batch32_lossWB'
+                        model_name = 'bwe_sol_8000_100harmo_25000steps_batch32_lossWB'
                     else:
-                        model_name = 'bwe_sol_100harmo_25000steps_batch32_lossHB'
+                        model_name = 'bwe_sol_8000_100harmo_25000steps_batch32_lossHB'
                 elif setting.data == 'medley':
                     if setting.loss == 'WB':
-                        model_name = 'bwe_medley_100harmo_25000steps_batch32_lossWB'
+                        model_name = 'bwe_medley_8000_100harmo_25000steps_batch32_lossWB'
                     elif setting.loss == 'HB':
-                        model_name = 'bwe_medley_100harmo_25000steps_batch32_lossHB'
+                        model_name = 'bwe_medley_8000_100harmo_25000steps_batch32_lossHB'
                 elif setting.data == 'synthetic':
                     if setting.loss == 'WB':
-                        model_name = 'bwe_synth_100harmo_5000steps_batch32_lossWB'
+                        model_name = 'bwe_synth_8000_100harmo_5000steps_batch32_lossWB'
                     else:
-                        model_name = 'bwe_synth_100harmo_5000steps_batch32_lossHB'
+                        model_name = 'bwe_synth_8000_100harmo_5000steps_batch32_lossHB'
+                elif setting.data == 'synthetic_crepe':
+                    if setting.loss == 'WB':
+                        model_name = 'bwe_synth_crepe_8000_100harmo_5000steps_batch32_lossWB'
+                    else:
+                        model_name = 'bwe_synth_crepe_8000_100harmo_5000steps_batch32_lossHB'
                 elif setting.data == 'dsd_sources':
                     if setting.loss == 'WB':
-                        model_name = 'bwe_dsd_sources_100harmo_25000steps_batch32_lossWB'
+                        model_name = 'bwe_dsd_sources_8000_100harmo_25000steps_batch32_lossWB'
                     elif setting.loss == 'HB':
-                        model_name = 'bwe_dsd_sources_100harmo_25000steps_batch32_lossHB'
+                        model_name = 'bwe_dsd_sources_8000_100harmo_25000steps_batch32_lossHB'
                 elif setting.data == 'dsd_mixtures':
                     if setting.loss == 'WB':
-                        model_name = 'bwe_dsd_mixtures_100harmo_25000steps_batch32_lossWB'
+                        model_name = 'bwe_dsd_mixtures_8000_100harmo_25000steps_batch32_lossWB'
                     elif setting.loss == 'HB':
-                        model_name = 'bwe_dsd_mixtures_100harmo_25000steps_batch32_lossHB'
+                        model_name = 'bwe_dsd_mixtures_8000_100harmo_25000steps_batch32_lossHB'
+            elif setting.model == 'resnet':
+                if setting.data == 'synthetic':
+                    model_name = 'bwe_synth_8000_resnet_64000steps_batch16'
+                elif setting.data == 'sol':
+                    model_name = 'bwe_sol_8000_resnet_64000steps_batch8'
+                elif setting.data == 'medley':
+                    model_name = 'bwe_medley_8000_resnet_250000steps_batch16'
+                elif setting.data == 'dsd_sources':
+                    model_name = 'bwe_dsd_sources_8000_resnet_250000steps_batch8'
+                elif setting.data == 'dsd_mixtures':
+                    model_name = 'bwe_dsd_mixtures_8000_resnet_250000steps_batch8'
 
 
         # config file loading
@@ -340,12 +446,19 @@ def evaluate(setting, experiment):
         rec_audio_list = []
         for i_batch, batch in tqdm(enumerate(dataloader)):
             if config['data']['dataset'] == 'synthetic':
-                if setting.model == 'ddsp_original_autoencoder':
-                    filename_idx = dataset.filenames[i_batch].split('/')[-1][:-4]
-                    chunk_idx = 0
-                elif setting.model == 'resnet':
+                if setting.sampling_rate == 16000:
+                    if setting.model == 'ddsp_original_autoencoder':
+                        filename_idx = dataset.filenames[i_batch].split('/')[-1][:-4]
+                        chunk_idx = 0
+                    elif setting.model == 'resnet':
+                        filename_idx = dataset.filenames[i_batch][0].split('/')[-1][:-4]
+                        chunk_idx = dataset.filenames[i_batch][1]
+                elif setting.sampling_rate == 8000:
                     filename_idx = dataset.filenames[i_batch][0].split('/')[-1][:-4]
                     chunk_idx = dataset.filenames[i_batch][1]
+            elif config['data']['dataset'] == 'synthetic_crepe':
+                filename_idx = dataset.filenames[i_batch][0].split('/')[-1][:-4]
+                chunk_idx = dataset.filenames[i_batch][1]
             elif config['data']['dataset'] == 'sol':
                 filename_idx = dataset.filenames[i_batch][0].split('/')[-1][:-4]
                 chunk_idx = dataset.filenames[i_batch][1]

@@ -25,12 +25,12 @@ experiment.add_plan('sbr',
     phase = ['oracle'],#, 'flipped', 'noise'],
     matchingEnergy = [0.5], #[0.25, 0.5, 1.0],
     nfft = [1024],
-    sampling_rate = [16000],
+    sampling_rate = [8000, 16000],
     split = ['train', 'test']
     )
 
 experiment.add_plan('ddsp',
-    data = ['synthetic', 'sol', 'medley', 'dsd_sources', 'dsd_mixtures'],
+    data = ['synthetic', 'synthetic_crepe', 'sol', 'medley', 'dsd_sources', 'dsd_mixtures'],
     alg = ['ddsp'],
     model = ['ddsp_original_autoencoder', 'resnet'],
     n_steps_total = [50000],
@@ -51,7 +51,7 @@ experiment.add_plan('ddsp',
 
 experiment.set_metric(
     name = 'lsd',
-    significance = True,
+    # significance = True,
     lower_the_better = True
 )
 
