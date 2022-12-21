@@ -75,6 +75,13 @@ def remove_above_nyquist(amplitudes, pitch, sampling_rate):
     aa = aa.permute(0, 2, 1)
     return amplitudes * aa
 
+def remove_outside_HB(amplitudes, freqs, sampling_rate):
+    n_harm = amplitudes.shape[1]
+    up_out = (freqs < sampling_rate/2).float() + 1e-4
+    down_out = (freqs > sampling_rate//2).float() + 1e-4
+    up_out = up_out.permute(0, 2, 1)
+    down_out = down_out.permute(0, 2, 1)
+    return amplitudes * up_out * down_out
 
 def extract_loudness(signal, sampling_rate, block_size, n_fft=2048):
     S = li.stft(
@@ -156,6 +163,11 @@ def harmonic_synth(pitch, amplitudes, sampling_rate):
     signal = (torch.sin(omegas) * amplitudes).sum(-1, keepdim=True)
     return signal
 
+def additive_synth(frequencies, amplitudes, sampling_rate):
+    n_harmonic = amplitudes.shape[-1]
+    omegas = torch.cumsum(2 * math.pi * frequencies / sampling_rate, 1)
+    signal = (torch.sin(omegas) * amplitudes).sum(-1, keepdim=True)
+    return signal
 
 def amp_to_impulse_response(amp, target_size):
     amp = torch.stack([amp, torch.zeros_like(amp)], -1)
