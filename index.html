@@ -1,1 +1,194 @@
-Hello World
+<html>
+<head>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<link href='http://fonts.googleapis.com/css?family=Lato:300,400,900' rel='stylesheet' type='text/css'>
+<link href="style.css" rel="stylesheet">
+<title>Efficient bandwidth extension of musical signals
+using a differentiable harmonic plus noise model</title>
+</head>
+<body>
+
+    <div id="header" class="container-fluid">
+            <h1>Efficient bandwidth extension of musical signals using a differentiable harmonic plus noise model</h1>
+   </div>
+
+
+<div class="authors">
+	Pierre-Amaury Grumiaux, Mathieu Lagrange
+</div>
+
+<div class="container">
+    <h2>Abstract</h2>
+    <p>
+        The task of bandwidth extension addresses the generation of missing high frequencies of audio signals based on knowledge of the low-frequency part of the sound. This task applies to various problems, such as audio coding or audio restoration. In this article, we focus on bandwidth extension of monophonic and polyphonic musical signals using a differentiable digital signal processing (DDSP) model. Such a model is composed of a neural network part trained to infer the parameters of a differentiable digital signal processing model, which efficiently generates the output full-band audio signal. 
+				<br>
+				We first address bandwidth extension of monophonic signals, and then propose two methods to handle polyphonic signals. The benefits of the proposed models are shown on monophonic and polyphonic synthetic data against a baseline and a deep-learning-based state-of-the-art model. The models are then evaluated on real data, in both monophonic and polyphonic context, and for a wide variety of instruments and musical genres. We show that all proposed models surpass the baseline and the state-of-the-art model for an objective metric computed in the frequency domain. A MUSHRA listening test confirms the superiority of the proposed approach.
+    </p>
+    <p>Experience code is available in <a href="https://github.com/mathieulagrange/ddspMusicBandwidthExtension">this github repo</a>.</p>
+</div>
+
+<div class="container" id="abstractdiv">
+    <h2>MUSHRA listening test samples</h2>
+    <p>The following samples allow you to listen to the high frequency reconstruction of the different proposed models and baselines. The low-band input signal and ground-truth signals are given, as well as the output of the considered baseline models and DDSP-based models.
+    </p>
+    <table class="table table-responsive">
+        <thead>
+        <tr class="text-center">
+            <td>Genre</td>
+            <td>Input signal</td>
+            <td>Ground-truth signal</td>
+            <td>SBR</td>
+            <td>Resnet</td>
+						<td><b>DDSP-noise</b></td>
+						<td><b>DDSP-mono-dec</b></td>
+						<td><b>DDSP-mono-dec-cyclic</b></td>
+						<td><b>DDSP-poly-dec</b></td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td class="desc">Blues</td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/blues.00011_LB.wav" type="audio/wav"></audio></td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/blues.00011_WB.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/blues.00011_sbr.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/blues.00011_resnet.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/blues.00011_ddsp_noise.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/blues.00011_ddsp_mono.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/blues.00011_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/blues.00011_ddsp_poly.wav" type="audio/wav"></audio></td>
+        </tr>
+				
+				<tr>
+            <td class="desc">Classical</td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/classical.00027_LB.wav" type="audio/wav"></audio></td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/classical.00027_WB.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/classical.00027_sbr.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/classical.00027_resnet.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/classical.00027_ddsp_noise.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/classical.00027_ddsp_mono.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/classical.00027_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/classical.00027_ddsp_poly.wav" type="audio/wav"></audio></td>
+        </tr>
+				
+				<tr>
+            <td class="desc">Country</td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/country.00063_LB.wav" type="audio/wav"></audio></td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/country.00063_WB.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/country.00063_sbr.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/country.00063_resnet.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/country.00063_ddsp_noise.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/country.00063_ddsp_mono.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/country.00063_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/country.00063_ddsp_poly.wav" type="audio/wav"></audio></td>
+        </tr>
+				
+				<tr>
+            <td class="desc">Disco</td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/disco.00025_LB.wav" type="audio/wav"></audio></td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/disco.00025_WB.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/disco.00025_sbr.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/disco.00025_resnet.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/disco.00025_ddsp_noise.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/disco.00025_ddsp_mono.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/disco.00025_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/disco.00025_ddsp_poly.wav" type="audio/wav"></audio></td>
+        </tr>
+				
+				<tr>
+            <td class="desc">Hip-hop</td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/hiphop.00063_LB.wav" type="audio/wav"></audio></td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/hiphop.00063_WB.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/hiphop.00063_sbr.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/hiphop.00063_resnet.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/hiphop.00063_ddsp_noise.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/hiphop.00063_ddsp_mono.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/hiphop.00063_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/hiphop.00063_ddsp_poly.wav" type="audio/wav"></audio></td>
+        </tr>
+				
+				<tr>
+            <td class="desc">Jazz</td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/jazz.00005_LB.wav" type="audio/wav"></audio></td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/jazz.00005_WB.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/jazz.00005_sbr.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/jazz.00005_resnet.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/jazz.00005_ddsp_noise.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/jazz.00005_ddsp_mono.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/jazz.00005_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/jazz.00005_ddsp_poly.wav" type="audio/wav"></audio></td>
+        </tr>
+				
+				<tr>
+            <td class="desc">Metal</td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/metal.00017_LB.wav" type="audio/wav"></audio></td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/metal.00017_WB.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/metal.00017_sbr.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/metal.00017_resnet.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/metal.00017_ddsp_noise.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/metal.00017_ddsp_mono.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/metal.00017_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/metal.00017_ddsp_poly.wav" type="audio/wav"></audio></td>
+        </tr>
+				
+				<tr>
+            <td class="desc">Pop</td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/pop.00032_LB.wav" type="audio/wav"></audio></td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/pop.00032_WB.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/pop.00032_sbr.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/pop.00032_resnet.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/pop.00032_ddsp_noise.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/pop.00032_ddsp_mono.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/pop.00032_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/pop.00032_ddsp_poly.wav" type="audio/wav"></audio></td>
+        </tr>
+				
+				<tr>
+            <td class="desc">Reggae</td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/reggae.00044_LB.wav" type="audio/wav"></audio></td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/reggae.00044_WB.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/reggae.00044_sbr.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/reggae.00044_resnet.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/reggae.00044_ddsp_noise.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/reggae.00044_ddsp_mono.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/reggae.00044_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/reggae.00044_ddsp_poly.wav" type="audio/wav"></audio></td>
+        </tr>
+				
+				<tr>
+            <td class="desc">Rock</td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/rock.00028_LB.wav" type="audio/wav"></audio></td>
+            <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/rock.00028_WB.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/rock.00028_sbr.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/rock.00028_resnet.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/rock.00028_ddsp_noise.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/rock.00028_ddsp_mono.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/rock.00028_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+						<td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/gtzan/rock.00028_ddsp_poly.wav" type="audio/wav"></audio></td>
+        </tr>
+
+        </tbody>
+    </table>
+</div>
+
+<script>
+function setupCallback(elem, elems) {
+  elem.addEventListener("play", function () {
+    for (var other of elems) {
+      if (other !== elem) {
+        other.pause();
+        // other.currentTime = 0.;
+      }
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  var elems = document.body.getElementsByTagName("audio");
+  for (var elem of elems) {
+    setupCallback(elem, elems);
+  }
+});
+</script>
+</body>
+</html>
