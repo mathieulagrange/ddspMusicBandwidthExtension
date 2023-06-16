@@ -1,0 +1,207 @@
+testname: Bandwidth extension listening test
+testId: 0
+bufferSize: 2048
+stopOnErrors: true
+showButtonPreviousPage: true
+remoteService: service/write.php
+
+pages:
+    - type: generic
+      id: first_page
+      name: Bandwidth extension listening test
+      content: Welcome to this audio listening test. This test is part of an experiment designed to develop an algorithm to extend the <b> bandwidth of musical signals to higher frequencies </b>. In such an algorithm, a musical signal is given as an input, with only low frequencies. The algorithm then must generate the missing high frequencies in a realistic way. <br> <br> In the present test, you will have to <b>rate several audio excerpts from 0 to 100</b>, with the following criterion: when <b>higher frequencies are rightfully recreated and it is pleasing to the ear</b>. 0 is a bad rating while 100 is a perfect rating. <br> <br> Each musical signal is given in 6 forms: one form is the input signal (no algorithm is applied), another form is the reference signal (the target signal with the original high frequencies), and the other 4 forms are different models generating high frequencies. <br> <br> You are asked to rate the 6 versions <b>with respect to the reference</b> whose quality is assumed to correspond to a rating of 100. <br> <br> For the best experience, we strongly recommend using <b>headphones</b>, and <b>turn off any noise canceling features</b> in order to not alter the signals. Also, choose a comfortable volume once during the training, and please do not modify it between several ratings since it can alter your own hearing perception. <br> <br> The next page will present you the rating interface as a training phase before actually proceeding to the test.
+
+    - type: mushra
+      id: trial1
+      name: MUSHRA
+      content: This training shows how to use the interface. Only 4 signals are shown along with the reference signal. Please rate each of the 4 signals, from 0 to 100, according to your own judgment regarding the quality of the high frequency generation. You can then go on with the actuel test.
+      showWaveform: true
+      enableLooping: true 
+      reference: configs/resources/audio/demo/pop.00021_WB.wav
+      createAnchor35: false
+      createAnchor70: false
+      stimuli:
+          C1: configs/resources/audio/demo/pop.00021_LB.wav
+          C3: configs/resources/audio/demo/pop.00021_ddsp_mono.wav
+          C4: configs/resources/audio/demo/pop.00021_resnet.wav
+
+    - type: generic
+      id: blank_page
+      name: Ready?
+      content: Now that you are confortable with the rating interface, we shall proceed to the actual test. Ready? Go! <br> <br> <b>Reminder:</b> do not alter the volume between ratings.
+  
+    - 
+          - random
+          - type: mushra
+            id: poly_1
+            name:
+            content: Please rate the quality of all 6 signals from 0 to 100, in comparison to the reference.
+            enableLooping: true 
+            reference: configs/resources/audio/gtzan/blues.00011_WB.wav
+            createAnchor35: false
+            createAnchor70: false
+            stimuli:
+                C1: configs/resources/audio/gtzan/blues.00011_LB.wav
+                C2: configs/resources/audio/gtzan/blues.00011_sbr.wav  
+                C3: configs/resources/audio/gtzan/blues.00011_resnet.wav  
+                C4: configs/resources/audio/gtzan/blues.00011_ddsp_mono.wav
+                C5: configs/resources/audio/gtzan/blues.00011_ddsp_noise.wav  
+          - type: mushra
+            id: poly_2
+            name: 
+            content: Please rate the quality of all 6 signals from 0 to 100, in comparison to the reference.
+            enableLooping: true 
+            reference: configs/resources/audio/gtzan/classical.00027_WB.wav
+            createAnchor35: false
+            createAnchor70: false
+            stimuli:
+                C1: configs/resources/audio/gtzan/classical.00027_LB.wav
+                C2: configs/resources/audio/gtzan/classical.00027_sbr.wav  
+                C3: configs/resources/audio/gtzan/classical.00027_resnet.wav  
+                C4: configs/resources/audio/gtzan/classical.00027_ddsp_mono.wav 
+                C5: configs/resources/audio/gtzan/classical.00027_ddsp_noise.wav  
+          - type: mushra
+            id: poly_3
+            name: 
+            content: Please rate the quality of all 6 signals from 0 to 100, in comparison to the reference.
+            enableLooping: true 
+            reference: configs/resources/audio/gtzan/country.00063_WB.wav
+            createAnchor35: false
+            createAnchor70: false
+            stimuli:
+                C1: configs/resources/audio/gtzan/country.00063_LB.wav
+                C2: configs/resources/audio/gtzan/country.00063_sbr.wav  
+                C3: configs/resources/audio/gtzan/country.00063_resnet.wav  
+                C4: configs/resources/audio/gtzan/country.00063_ddsp_mono.wav
+                C5: configs/resources/audio/gtzan/country.00063_ddsp_noise.wav  
+          - type: mushra
+            id: poly_4
+            name: 
+            content: Please rate the quality of all 6 signals from 0 to 100, in comparison to the reference.
+            enableLooping: true 
+            reference: configs/resources/audio/gtzan/disco.00025_WB.wav
+            createAnchor35: false
+            createAnchor70: false
+            stimuli:
+                C1: configs/resources/audio/gtzan/disco.00025_LB.wav
+                C2: configs/resources/audio/gtzan/disco.00025_sbr.wav  
+                C3: configs/resources/audio/gtzan/disco.00025_resnet.wav  
+                C4: configs/resources/audio/gtzan/disco.00025_ddsp_mono.wav
+                C5: configs/resources/audio/gtzan/disco.00025_ddsp_noise.wav  
+          - type: mushra
+            id: poly_5
+            name: 
+            content: Please rate the quality of all 6 signals from 0 to 100, in comparison to the reference.
+            enableLooping: true 
+            reference: configs/resources/audio/gtzan/hiphop.00063_WB.wav
+            createAnchor35: false
+            createAnchor70: false
+            stimuli:
+                C1: configs/resources/audio/gtzan/hiphop.00063_LB.wav
+                C2: configs/resources/audio/gtzan/hiphop.00063_sbr.wav  
+                C3: configs/resources/audio/gtzan/hiphop.00063_resnet.wav  
+                C4: configs/resources/audio/gtzan/hiphop.00063_ddsp_mono.wav
+                C5: configs/resources/audio/gtzan/hiphop.00063_ddsp_noise.wav  
+          - type: mushra
+            id: poly_6
+            name:
+            content: Please rate the quality of all 6 signals from 0 to 100, in comparison to the reference.
+            enableLooping: true 
+            reference: configs/resources/audio/gtzan/jazz.00005_WB.wav
+            createAnchor35: false
+            createAnchor70: false
+            stimuli:
+                C1: configs/resources/audio/gtzan/jazz.00005_LB.wav
+                C2: configs/resources/audio/gtzan/jazz.00005_sbr.wav  
+                C3: configs/resources/audio/gtzan/jazz.00005_resnet.wav  
+                C4: configs/resources/audio/gtzan/jazz.00005_ddsp_mono.wav
+                C5: configs/resources/audio/gtzan/jazz.00005_ddsp_noise.wav  
+          - type: mushra
+            id: poly_7
+            name: 
+            content: Please rate the quality of all 6 signals from 0 to 100, in comparison to the reference.
+            enableLooping: true 
+            reference: configs/resources/audio/gtzan/metal.00017_WB.wav
+            createAnchor35: false
+            createAnchor70: false
+            stimuli:
+                C1: configs/resources/audio/gtzan/metal.00017_LB.wav
+                C2: configs/resources/audio/gtzan/metal.00017_sbr.wav  
+                C3: configs/resources/audio/gtzan/metal.00017_resnet.wav  
+                C4: configs/resources/audio/gtzan/metal.00017_ddsp_mono.wav
+                C5: configs/resources/audio/gtzan/metal.00017_ddsp_noise.wav  
+          - type: mushra
+            id: poly_8
+            name: 
+            content: Please rate the quality of all 6 signals from 0 to 100, in comparison to the reference.
+            enableLooping: true 
+            reference: configs/resources/audio/gtzan/pop.00032_WB.wav
+            createAnchor35: false
+            createAnchor70: false
+            stimuli:
+                C1: configs/resources/audio/gtzan/pop.00032_LB.wav
+                C2: configs/resources/audio/gtzan/pop.00032_sbr.wav  
+                C3: configs/resources/audio/gtzan/pop.00032_resnet.wav  
+                C4: configs/resources/audio/gtzan/pop.00032_ddsp_mono.wav
+                C5: configs/resources/audio/gtzan/pop.00032_ddsp_noise.wav  
+          - type: mushra
+            id: poly_9
+            name: 
+            content: Please rate the quality of all 6 signals from 0 to 100, in comparison to the reference.
+            enableLooping: true 
+            reference: configs/resources/audio/gtzan/reggae.00044_WB.wav
+            createAnchor35: false
+            createAnchor70: false
+            stimuli:
+                C1: configs/resources/audio/gtzan/reggae.00044_LB.wav
+                C2: configs/resources/audio/gtzan/reggae.00044_sbr.wav  
+                C3: configs/resources/audio/gtzan/reggae.00044_resnet.wav  
+                C4: configs/resources/audio/gtzan/reggae.00044_ddsp_mono.wav  
+                C5: configs/resources/audio/gtzan/reggae.00044_ddsp_noise.wav  
+          - type: mushra
+            id: poly_10
+            name: 
+            content: Please rate the quality of all 6 signals from 0 to 100, in comparison to the reference.
+            enableLooping: true 
+            reference: configs/resources/audio/gtzan/rock.00028_WB.wav
+            createAnchor35: false
+            createAnchor70: false
+            stimuli:
+                C1: configs/resources/audio/gtzan/rock.00028_LB.wav
+                C2: configs/resources/audio/gtzan/rock.00028_sbr.wav  
+                C3: configs/resources/audio/gtzan/rock.00028_resnet.wav  
+                C4: configs/resources/audio/gtzan/rock.00028_ddsp_mono.wav
+                C5: configs/resources/audio/gtzan/rock.00028_ddsp_noise.wav  
+
+    - type: finish
+      name: Thank you
+      content: Thank you for completing this perceptive test. The results will help us assess our algorithm against state-of-the-art methods. Can you finally fill in some anonymous information so that our study is more precise ? Thanks a lot!
+      showResults: false
+      writeResults: true
+      questionnaire:
+          - type: text
+            label: E-mail
+            name: email
+          - type: likert
+            name: gender
+            label: Gender
+            response:
+             - value: female
+               label: Female
+             - value: male
+               label: Male
+             - value: other
+               label: Do not specify
+          - type: number
+            label: Age
+            name: age
+            min: 0
+            max: 100
+            default: 30
+          - type: number
+            label: How many years of musical training do you have ?
+            name: musical_experience
+            min: 0
+            max: 100
+            default: 0
+          
