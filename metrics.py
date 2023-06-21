@@ -4,7 +4,6 @@ import librosa as lr
 from tqdm import tqdm
 import numpy as np
 import os
-import tensorflow as tf
 from math import ceil
 
 epsilon = 10e-6
@@ -23,12 +22,13 @@ def sdr(ref, est):
 def lsd(ref, est, n_fft=1024, hop_length=512):
     '''Calculate the log-spectral distance between a reference signal and its estimation
     '''
-    spec_ref = np.abs(ref)
-    spec_est = np.abs(est)
+    spec_ref = np.round(np.abs(ref), decimals=3)
+    spec_est = np.round(np.abs(est), decimals=3)
+
     log_diff = 10*(np.log10(np.square(spec_est)+epsilon)-np.log10((np.square(spec_ref)+epsilon)))
     freq_mean = np.mean(np.square(log_diff[:, :-1]), axis=0)
     lsd = np.mean(np.sqrt(freq_mean))
-
+    lsd = np.round(lsd, decimals=2)
     return lsd
 
 # def compute_lsd(model_dir, model_type, data, split, step, nfft=1024, hop_length=512, sampling_rate=16000):

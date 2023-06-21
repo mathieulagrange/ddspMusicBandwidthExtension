@@ -2,8 +2,10 @@ import torch
 import torch.nn as nn
 import math
 import torchaudio
-from utils import scale_function
+from utils import scale_function, sigmoid_to_freqs
 import numpy as np
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class MLP(nn.Module):
     def __init__(self, n_input, n_units, n_layer, relu=nn.ReLU, inplace=True, device="cuda;0"):
@@ -19,14 +21,6 @@ class MLP(nn.Module):
                 nn.LayerNorm(normalized_shape=n_units),
                 relu(inplace=self.inplace),
             )
-        # self.add_module(
-        #     f"mlp_layer1",
-        #     nn.Sequential(
-        #         nn.Linear(n_input, n_units),
-        #         nn.LayerNorm(normalized_shape=n_units),
-        #         relu(inplace=self.inplace),
-        #     ),
-        # )
         self.mlp_layer_list = []
         for i in range(2, n_layer + 1):
             # mlp_name = f'mlp_layer{i}'
@@ -38,12 +32,14 @@ class MLP(nn.Module):
                 ))
 
     def forward(self, x):
+        # print(x.dtype)
+        # x = x.double()
+        # print(x, x.dtype)
         x = self.mlp_layer1(x)
         for layer in self.mlp_layer_list:
             layer.to(self.device)
             x = layer(x)
         return x
-
 
 class Z_Encoder(nn.Module):
     def __init__(
@@ -63,10 +59,9 @@ class Z_Encoder(nn.Module):
             n_mfcc=n_mfcc,
             log_mels=True,
             melkwargs=dict(
-                n_fft=n_fft, hop_length=hop_length, n_mels=n_mels, f_min=20.0, f_max=8000.0,
+                n_fft=n_fft, hop_length=hop_length, n_mels=n_mels, f_min=20.0, f_max=8000.0
             ),
         )
-
         self.norm = nn.InstanceNorm1d(n_mfcc, affine=True)
         self.gru = nn.GRU(
             input_size=n_mfcc,
@@ -163,6 +158,248 @@ class Decoder(nn.Module):
         harmo_amps = harmo_amps.permute(0, 2, 1)  # to match the shape of harmonic oscillator's input.
 
         return dict(f0 = f0, amp = amp, harmo_amps = harmo_amps, noise_filter = noise_filter)
+
+class DecoderMulti(nn.Module):
+    def __init__(self, use_z = True,
+                 mlp_units = 512,
+                 mlp_layers = 3, 
+                 z_units = 16, 
+                 gru_units = 512, 
+                 bidirectional = False, 
+                 n_harmonics = 101, 
+                 n_bands = 65,
+                 max_sources = 2,
+                 device = "cuda:0"):
+        super().__init__()
+        self.max_sources = max_sources
+        self.mlp_f0_list = [MLP(n_input=1, n_units=mlp_units, n_layer=mlp_layers, device=device) for i in range(max_sources)]
+        self.mlp_loudness = MLP(n_input=1, n_units=mlp_units, n_layer=mlp_layers, device=device)
+        self.use_z = use_z
+        if use_z:
+            self.mlp_z = MLP(
+                n_input=z_units, n_units=mlp_units, n_layer=mlp_layers, device=device
+            )
+            self.num_mlp = 2+max_sources
+        else:
+            self.num_mlp = 1+max_sources
+
+        self.gru = nn.GRU(
+            input_size=self.num_mlp * mlp_units,
+            hidden_size=gru_units,
+            num_layers=1,
+            batch_first=True,
+            bidirectional=bidirectional,
+        )
+
+        self.mlp_gru = MLP(
+            n_input=gru_units * 2 if bidirectional else gru_units,
+            n_units=mlp_units,
+            n_layer=mlp_layers,
+            inplace=True,
+            device=device
+        )
+
+        # one element for overall loudness
+        self.dense_harmonic_list = [nn.Linear(mlp_units, n_harmonics + 1) for i in range(max_sources)]
+        self.dense_filter = nn.Linear(mlp_units, n_bands)
+
+        self.device = device
+
+    def forward(self, latent, f0_list, loudness):
+        if self.use_z:
+            z = latent
+            self.mlp_z.to(self.device)
+            latent_z = self.mlp_z(z)
+
+        latent_f0_list = []
+        for i_source in range(self.max_sources):
+            cur_mlp_f0 = self.mlp_f0_list[i_source].to(self.device)
+            cur_f0 = f0_list[:, i_source, :, :]
+            latent_f0 = cur_mlp_f0(cur_f0)
+            latent_f0_list.append(latent_f0)
+        latent_f0_concat = torch.cat(latent_f0_list, dim=-1)
+
+        latent_loudness = self.mlp_loudness(loudness)
+
+        if self.use_z:
+            latent = torch.cat((latent_f0_concat, latent_z, latent_loudness), dim=-1)
+        else:
+            latent = torch.cat((latent_f0_concat, latent_loudness), dim=-1)
+
+        latent, (h) = self.gru(latent)
+        latent = self.mlp_gru(latent)
+
+        amp_list = []
+        harmo_amps_list = []
+        for i_source in range(self.max_sources):
+            cur_dense_harmo = self.dense_harmonic_list[i_source].to(self.device)
+            amplitude = cur_dense_harmo (latent)
+            amp = amplitude[..., 0]
+            amp = scale_function(amp)
+
+            # a = torch.sigmoid(amplitude[..., 0])
+            harmo_amps = torch.nn.functional.softmax(amplitude[..., 1:], dim=-1)
+            harmo_amps = harmo_amps.permute(0, 2, 1)  # to match the shape of harmonic oscillator's input.
+
+            amp_list.append(amp)
+            harmo_amps_list.append(harmo_amps)
+
+        noise_filter = self.dense_filter(latent)
+        noise_filter = scale_function(noise_filter)
+
+        return dict(f0 = f0_list, amp_list = amp_list, harmo_amps_list = harmo_amps_list, noise_filter = noise_filter)
+
+class DecoderNonHarmonic(nn.Module):
+    def __init__(self, use_z = True,
+                 mlp_units = 512,
+                 mlp_layers = 3, 
+                 z_units = 16, 
+                 gru_units = 512, 
+                 bidirectional = False, 
+                 n_harmonics = 101, 
+                 n_bands = 65,
+                 device = "cuda:0",
+                 sampling_rate = 16000):
+        super().__init__()
+        self.mlp_f0 = MLP(n_input=1, n_units=mlp_units, n_layer=mlp_layers, device=device)
+        self.mlp_loudness = MLP(n_input=1, n_units=mlp_units, n_layer=mlp_layers, device=device)
+        self.use_z = use_z
+        if use_z:
+            self.mlp_z = MLP(
+                n_input=z_units, n_units=mlp_units, n_layer=mlp_layers, device=device
+            )
+            self.num_mlp = 3
+        else:
+            self.num_mlp = 2
+
+        self.gru = nn.GRU(
+            input_size=self.num_mlp * mlp_units,
+            hidden_size=gru_units,
+            num_layers=1,
+            batch_first=True,
+            bidirectional=bidirectional,
+        )
+
+        self.mlp_gru = MLP(
+            n_input=gru_units * 2 if bidirectional else gru_units,
+            n_units=mlp_units,
+            n_layer=mlp_layers,
+            inplace=True,
+            device=device
+        )
+
+        # one element for overall loudness
+        self.dense_harmonic_freqs = nn.Linear(mlp_units, n_harmonics)
+        self.dense_harmonic_amps = nn.Linear(mlp_units, n_harmonics + 1)
+        self.dense_filter = nn.Linear(mlp_units, n_bands)
+
+        self.device = device
+        self.sampling_rate = sampling_rate
+
+    def forward(self, latent, f0, loudness):
+        if self.use_z:
+            z = latent
+            self.mlp_z.to(self.device)
+            latent_z = self.mlp_z(z)
+
+        latent_f0 = self.mlp_f0(f0)
+
+        latent_loudness = self.mlp_loudness(loudness)
+
+        if self.use_z:
+            latent = torch.cat((latent_f0, latent_z, latent_loudness), dim=-1)
+        else:
+            latent = torch.cat((latent_f0, latent_loudness), dim=-1)
+
+        latent, (h) = self.gru(latent)
+        latent = self.mlp_gru(latent)
+
+        amplitude = self.dense_harmonic_amps(latent)
+        amp = amplitude[..., 0]
+        amp = scale_function(amp)
+
+        # a = torch.sigmoid(amplitude[..., 0])
+        harmo_amps = torch.nn.functional.softmax(amplitude[..., 1:], dim=-1)
+        harmo_freqs = self.dense_harmonic_freqs(latent)
+        harmo_freqs = torch.sigmoid(harmo_freqs)
+        harmo_freqs = sigmoid_to_freqs(harmo_freqs, self.sampling_rate)
+
+        noise_filter = self.dense_filter(latent)
+        noise_filter = scale_function(noise_filter)
+
+        harmo_amps = harmo_amps.permute(0, 2, 1)  # to match the shape of harmonic oscillator's input.
+        harmo_freqs = harmo_freqs.permute(0, 2, 1)  # to match the shape of harmonic oscillator's input.
+
+        return dict(f0 = f0, amp = amp, harmo_freqs = harmo_freqs, harmo_amps = harmo_amps, noise_filter = noise_filter)
+
+class DecoderNoise(nn.Module):
+    def __init__(self, use_z = True,
+                 mlp_units = 512,
+                 mlp_layers = 3, 
+                 z_units = 16, 
+                 gru_units = 512, 
+                 bidirectional = False, 
+                 n_bands = 65,
+                 device = "cuda:0"):
+        super().__init__()
+        self.mlp_loudness = MLP(n_input=1, n_units=mlp_units, n_layer=mlp_layers, device=device)
+        self.use_z = use_z
+        if use_z:
+            self.mlp_z = MLP(
+                n_input=z_units, n_units=mlp_units, n_layer=mlp_layers, device=device
+            )
+            self.num_mlp = 2
+        else:
+            self.num_mlp = 1
+
+        self.gru = nn.GRU(
+            input_size=self.num_mlp * mlp_units,
+            hidden_size=gru_units,
+            num_layers=1,
+            batch_first=True,
+            bidirectional=bidirectional,
+        )
+
+        self.mlp_gru = MLP(
+            n_input=gru_units * 2 if bidirectional else gru_units,
+            n_units=mlp_units,
+            n_layer=mlp_layers,
+            inplace=True,
+            device=device
+        )
+
+        # one element for overall loudness
+        self.dense_filter = nn.Linear(mlp_units, n_bands)
+
+        self.device = device
+
+    def forward(self, latent, loudness):
+        # print('inside decoder: latent and loudness')
+        # print(latent[:10], loudness[:10])
+        # print('----------------')
+        if self.use_z:
+            z = latent
+            self.mlp_z.to(self.device)
+            latent_z = self.mlp_z(z)
+
+        latent_loudness = self.mlp_loudness(loudness)
+        # print('second latent')
+        # print(latent_loudness[:10], latent_z[:10])
+        # print('---------------')
+
+        if self.use_z:
+            latent = torch.cat((latent_z, latent_loudness), dim=-1)
+        else:
+            latent = torch.cat((latent_loudness), dim=-1)
+
+        latent, (h) = self.gru(latent)
+        latent = self.mlp_gru(latent)
+
+        noise_filter = self.dense_filter(latent)
+        noise_filter = scale_function(noise_filter)
+
+        return dict(noise_filter = noise_filter)
+
 
 class HarmonicOscillator(nn.Module):
     def __init__(self, sr=16000, frame_length=64, attenuate_gain=0.02, device="cuda"):

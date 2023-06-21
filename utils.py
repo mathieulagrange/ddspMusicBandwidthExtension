@@ -20,6 +20,13 @@ def filter_out_inf_then_mean(array):
 def scale_function(x):
     return 2 * torch.sigmoid(x)**(math.log(10)) + 1e-7
 
+def sigmoid_to_freqs(freqs, sampling_rate):
+    # convert frequencies from sigmoid output (between 0 and 1) 
+    # to high-band frequencies between sampling_rate//4 and sampling_rate//2
+    freq_low = sampling_rate//4
+    freq_high = sampling_rate//2
+    return freq_low * freqs + freq_low
+
 def get_scheduler(len_dataset, start_lr, stop_lr, length):
     def schedule(epoch):
         step = epoch * len_dataset
