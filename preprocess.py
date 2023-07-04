@@ -30,9 +30,9 @@ def preprocess(f, model, sampling_rate, block_size, signal_length, oneshot, down
 
     if model == 'ddsp':
         pitch = extract_pitch(x_LB, alg='crepe', sampling_rate=sampling_rate, block_size=block_size)
-        # indiv_pitches = extract_pitch(x_LB, alg='bittner', sampling_rate=sampling_rate, block_size=block_size)
+        indiv_pitches = extract_pitch(x_LB, alg='bittner', sampling_rate=sampling_rate, block_size=block_size)
         loudness = extract_loudness(x_LB, sampling_rate, block_size)
-        indiv_pitches = None
+        # indiv_pitches = None
         # if len(str(f).split('/')[-1][:-4].split('_')) == 8:
         #     pitch = extract_pitch_from_filename(f, 'synthetic', sampling_rate, frame_size=block_size)
         #     pitch_list = [pitch]
@@ -125,136 +125,24 @@ def main():
 
     model = config['train']['model']
     
-    if config['preprocess']['downsampling_factor'] == 2:
-        if config['preprocess']['sampling_rate'] == 16000:
-            if config['data']['dataset'] == 'synthetic':
-                data_location = os.path.join(customPath.synthetic(),args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic(), f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'synthetic_crepe':
-                data_location = os.path.join(customPath.synthetic_crepe(),args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic_crepe(), f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'synthetic_poly':
-                data_location = os.path.join(customPath.synthetic_poly(),args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic_poly(), f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'synthetic_poly_2':
-                data_location = os.path.join(customPath.synthetic_poly_2(),args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic_poly_2(), f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'synthetic_poly_3':
-                data_location = os.path.join(customPath.synthetic_poly_3(),args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic_poly_3(), f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'synthetic_poly_mono':
-                data_location = os.path.join(customPath.synthetic_poly_mono(),args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic_poly_mono(), f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'synthetic_poly_mono_2':
-                data_location = os.path.join(customPath.synthetic_poly_mono_2(),args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic_poly_mono_2(), f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'sol':
-                data_location = os.path.join(customPath.orchideaSOL(),args.SPLIT)
-                out_dir = os.path.join(customPath.orchideaSOL(), f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'tiny':
-                data_location = os.path.join(customPath.orchideaSOL_tiny(),args.SPLIT)
-                out_dir = os.path.join(customPath.orchideaSOL_tiny(), f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'medley':
-                data_location = os.path.join(customPath.medleySolosDB(),args.SPLIT)
-                out_dir = os.path.join(customPath.medleySolosDB(), f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'dsd_sources':
-                data_location = os.path.join(customPath.dsd_sources(),args.SPLIT)
-                out_dir = os.path.join(customPath.dsd_sources(), f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'dsd_mixtures':
-                data_location = os.path.join(customPath.dsd_mixtures(),args.SPLIT)
-                out_dir = os.path.join(customPath.dsd_mixtures(), f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'gtzan':
-                data_location = os.path.join(customPath.gtzan(),args.SPLIT)
-                out_dir = os.path.join(customPath.gtzan(), f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'medleyDB_stems':
-                data_location = os.path.join(customPath.medleyDB_stems(),args.SPLIT)
-                out_dir = os.path.join(customPath.medleyDB_stems(), f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'medleyDB_mixtures':
-                data_location = os.path.join(customPath.medleyDB_mixtures(),args.SPLIT)
-                out_dir = os.path.join(customPath.medleyDB_mixtures(), f'preprocessed_{model}/{args.SPLIT}')
-
-        elif config['preprocess']['sampling_rate'] == 8000:
-            if config['data']['dataset'] == 'synthetic':
-                data_location = os.path.join(customPath.synthetic(), '8000', args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic(), '8000', f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'synthetic_crepe':
-                data_location = os.path.join(customPath.synthetic_crepe(), '8000', args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic_crepe(), '8000', f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'synthetic_poly':
-                data_location = os.path.join(customPath.synthetic_poly(), '8000', args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic_poly(), '8000', f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'sol':
-                data_location = os.path.join(customPath.orchideaSOL(), '8000', args.SPLIT)
-                out_dir = os.path.join(customPath.orchideaSOL(), '8000', f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'tiny':
-                data_location = os.path.join(customPath.orchideaSOL_tiny(), '8000', args.SPLIT)
-                out_dir = os.path.join(customPath.orchideaSOL_tiny(), '8000', f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'medley':
-                data_location = os.path.join(customPath.medleySolosDB(), '8000', args.SPLIT)
-                out_dir = os.path.join(customPath.medleySolosDB(), '8000', f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'dsd_sources':
-                data_location = os.path.join(customPath.dsd_sources(), '8000', args.SPLIT)
-                out_dir = os.path.join(customPath.dsd_sources(), '8000', f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'dsd_mixtures':
-                data_location = os.path.join(customPath.dsd_mixtures(),'8000', args.SPLIT)
-                out_dir = os.path.join(customPath.dsd_mixtures(), '8000', f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'gtzan':
-                data_location = os.path.join(customPath.gtzan(),'8000', args.SPLIT)
-                out_dir = os.path.join(customPath.gtzan(), '8000', f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'medleyDB_stems':
-                data_location = os.path.join(customPath.medleyDB_stems(),'8000', args.SPLIT)
-                out_dir = os.path.join(customPath.medleyDB_stems(), '8000', f'preprocessed_{model}/{args.SPLIT}')
-            elif config['data']['dataset'] == 'medleyDB_mixtures':
-                data_location = os.path.join(customPath.medleyDB_mixtures(),'8000', args.SPLIT)
-                out_dir = os.path.join(customPath.medleyDB_mixtures(), '8000', f'preprocessed_{model}/{args.SPLIT}')
-
-    elif config['preprocess']['downsampling_factor'] == 4:
-        if config['preprocess']['sampling_rate'] == 16000:
-            if config['data']['dataset'] == 'synthetic':
-                data_location = os.path.join(customPath.synthetic(),args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic(), f'preprocessed_{model}_4/{args.SPLIT}')
-            elif config['data']['dataset'] == 'synthetic_crepe':
-                data_location = os.path.join(customPath.synthetic_crepe(),args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic_crepe(), f'preprocessed_{model}_4/{args.SPLIT}')
-            elif config['data']['dataset'] == 'synthetic_poly':
-                data_location = os.path.join(customPath.synthetic_poly(),args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic_poly(), f'preprocessed_{model}_4/{args.SPLIT}')
-            elif config['data']['dataset'] == 'synthetic_poly_2':
-                data_location = os.path.join(customPath.synthetic_poly_2(),args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic_poly_2(), f'preprocessed_{model}_4/{args.SPLIT}')
-            elif config['data']['dataset'] == 'synthetic_poly_3':
-                data_location = os.path.join(customPath.synthetic_poly_3(),args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic_poly_3(), f'preprocessed_{model}_4/{args.SPLIT}')
-            elif config['data']['dataset'] == 'synthetic_poly_mono':
-                data_location = os.path.join(customPath.synthetic_poly_mono(),args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic_poly_mono(), f'preprocessed_{model}_4/{args.SPLIT}')
-            elif config['data']['dataset'] == 'synthetic_poly_mono_2':
-                data_location = os.path.join(customPath.synthetic_poly_mono_2(),args.SPLIT)
-                out_dir = os.path.join(customPath.synthetic_poly_mono_2(), f'preprocessed_{model}_4/{args.SPLIT}')
-            elif config['data']['dataset'] == 'sol':
-                data_location = os.path.join(customPath.orchideaSOL(),args.SPLIT)
-                out_dir = os.path.join(customPath.orchideaSOL(), f'preprocessed_{model}_4/{args.SPLIT}')
-            elif config['data']['dataset'] == 'tiny':
-                data_location = os.path.join(customPath.orchideaSOL_tiny(),args.SPLIT)
-                out_dir = os.path.join(customPath.orchideaSOL_tiny(), f'preprocessed_{model}_4/{args.SPLIT}')
-            elif config['data']['dataset'] == 'medley':
-                data_location = os.path.join(customPath.medleySolosDB(),args.SPLIT)
-                out_dir = os.path.join(customPath.medleySolosDB(), f'preprocessed_{model}_4/{args.SPLIT}')
-            elif config['data']['dataset'] == 'dsd_sources':
-                data_location = os.path.join(customPath.dsd_sources(),args.SPLIT)
-                out_dir = os.path.join(customPath.dsd_sources(), f'preprocessed_{model}_4/{args.SPLIT}')
-            elif config['data']['dataset'] == 'dsd_mixtures':
-                data_location = os.path.join(customPath.dsd_mixtures(),args.SPLIT)
-                out_dir = os.path.join(customPath.dsd_mixtures(), f'preprocessed_{model}_4/{args.SPLIT}')
-            elif config['data']['dataset'] == 'gtzan':
-                data_location = os.path.join(customPath.gtzan(),args.SPLIT)
-                out_dir = os.path.join(customPath.gtzan(), f'preprocessed_{model}_4/{args.SPLIT}')
-            elif config['data']['dataset'] == 'medleyDB_stems':
-                data_location = os.path.join(customPath.medleyDB_stems(),args.SPLIT)
-                out_dir = os.path.join(customPath.medleyDB_stems(), f'preprocessed_{model}_4/{args.SPLIT}')
-            elif config['data']['dataset'] == 'medleyDB_mixtures':
-                data_location = os.path.join(customPath.medleyDB_mixtures(),args.SPLIT)
-                out_dir = os.path.join(customPath.medleyDB_mixtures(), f'preprocessed_{model}_4/{args.SPLIT}')
+    if config['data']['dataset'] == 'synthetic':
+        data_location = os.path.join(customPath.synthetic(),args.SPLIT)
+        out_dir = os.path.join(customPath.synthetic(), f'preprocessed_{model}/{args.SPLIT}')
+    elif config['data']['dataset'] == 'synthetic_poly':
+        data_location = os.path.join(customPath.synthetic_poly(),args.SPLIT)
+        out_dir = os.path.join(customPath.synthetic_poly(), f'preprocessed_{model}/{args.SPLIT}')
+    elif config['data']['dataset'] == 'sol':
+        data_location = os.path.join(customPath.orchideaSOL(),args.SPLIT)
+        out_dir = os.path.join(customPath.orchideaSOL(), f'preprocessed_{model}/{args.SPLIT}')
+    elif config['data']['dataset'] == 'medley':
+        data_location = os.path.join(customPath.medleySolosDB(),args.SPLIT)
+        out_dir = os.path.join(customPath.medleySolosDB(), f'preprocessed_{model}/{args.SPLIT}')
+    elif config['data']['dataset'] == 'gtzan':
+        data_location = os.path.join(customPath.gtzan(),args.SPLIT)
+        out_dir = os.path.join(customPath.gtzan(), f'preprocessed_{model}/{args.SPLIT}')
+    elif config['data']['dataset'] == 'medleyDB_mixtures':
+        data_location = os.path.join(customPath.medleyDB_mixtures(),args.SPLIT)
+        out_dir = os.path.join(customPath.medleyDB_mixtures(), f'preprocessed_{model}/{args.SPLIT}')
 
     makedirs(out_dir, exist_ok=True)
 
