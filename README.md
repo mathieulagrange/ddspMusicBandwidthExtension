@@ -15,7 +15,9 @@ If you want to replicate paper results, you need to download the required datase
 python3 preprocessing.py --name config_file_name --split split
 ```
 
-where config_file_name is the name of the config file without extension, i.e., `config` if you are using the provided default config file `config.yaml` in the config folder, and split is either *train* or *test*.
+where config_file_name is the name of the config file without extension, i.e., *config* if you are using the provided default config file `config.yaml` in the config folder, and split is either *train* or *test*.
+
+In each dataset folder, you should have two split folders labeled *train* and *test* containing the .wav files. Modify `customPath.py` to provide your own paths.
 
 ## 2 - Replication of paper results
 
