@@ -1,0 +1,33 @@
+data:
+  dataset: gtzan
+  extension: wav
+  input: LB
+  mean_loudness: -8.291287868022911
+  std_loudness: 2.1910222426056887
+model:
+  block_size: 256
+  device: cpu
+  hidden_size: 512
+  n_bands: 65
+  n_harmonics: 100
+  sampling_rate: 16000
+preprocess:
+  block_size: 256
+  downsampling_factor: 4
+  oneshot: false
+  sampling_rate: 16000
+  signal_length: 64000
+train:
+  HF: true
+  batch: 32
+  model: ddsp
+  overlap: 0.75
+  scales:
+  - 2048
+  - 1024
+  - 512
+  - 256
+  - 128
+  - 64
+  start_lr: 0.001
+  stop_lr: 0.0001
