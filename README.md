@@ -46,12 +46,34 @@ where *config_file_name* is the name of the config file, *dataset_name* is the n
 ## 5 Config file entries
 
 Below we detail what each entry of the config file correspond to in our experiment/models:
-- data
-    - dataset: dataset name (be sure to modify `customPath.py` with your own paths)
-    - extension: sound file extension
-    - input: LB if you inputa  low-band signal in your model, WB if you input a full-band signal
-    - mean_loudness: automatically added by `preprocessed.py`, computed as the mean loudness over the whole dataset
-    - std_loudness: automatically added by `preprocessed.py`, computed as the standard deviation of the loudness over the whole dataset
+- **data**
+    - **dataset**: dataset name (be sure to modify `customPath.py` with your own paths)
+    - **extension**: sound file extension
+    - **input**: `LB` if you input a low-band signal in your model, `WB` if you input a full-band signal
+    - **mean_loudness**: automatically added by `preprocessed.py`, computed as the mean loudness over the whole dataset
+    - **std_loudness**: automatically added by `preprocessed.py`, computed as the standard deviation of the loudness over the whole dataset
+- **model**
+    - **block_size**: size of blocks in the model
+    - **device**: `cpu` or `cuda`, device on which computation is done
+    - **hidden_size**: size of some hidden layers in the model
+    - **max_sources**: max number of f0 considered in the model
+    - **n_bands**: number of frequency bands in the estimated noise transfer function  
+    - **n_harmonics**: number of harmonics considered by the additive synthesizer
+    - **sampling_rate**: sampling rate of input and output signals
+- **preprocess**
+    - **block_size**: block size used in the pitch estimators
+    - **downsampling_factor**: ratio between the highest frequency wanted in the output signal and the actual highest frequency in the input signal (4 in our experiments)
+    - **oneshot**: `true` if we crop the preprocess signal to the first chunk of lenght *signal_length*, `false` if we just frame it with chunks of size *signal_length*
+    - **sampling_rate**: sampling rate of the considered signals
+    - **signal_length**: length of the chunks obtained by preprocessing, which correspond to the model input signal length
+- **train**
+    - **HF**: `true` if MSS loss is computed only on reconstructed high frequencies, `false` if it is computed on the whole band
+    - **batch**: batch size
+    - **model**: model type: `ddsp`, `ddsp_noise`, `ddsp_poly_decoder` or `resnet`
+    - **overlap**: frame overlap used in MSS loss
+    - **scales**: FFT sizes used in MSS loss
+    - **start_lr**: start learning rate during training
+    - **stop_lr**: last learning rate
 
 ## REFERENCES
 

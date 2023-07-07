@@ -8,7 +8,7 @@ import numpy as np
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class MLP(nn.Module):
-    def __init__(self, n_input, n_units, n_layer, relu=nn.ReLU, inplace=True, device="cuda;0"):
+    def __init__(self, n_input, n_units, n_layer, relu=nn.ReLU, inplace=True, device="cuda:0"):
         super().__init__()
         self.n_layer = n_layer
         self.n_input = n_input
@@ -23,7 +23,6 @@ class MLP(nn.Module):
             )
         self.mlp_layer_list = []
         for i in range(2, n_layer + 1):
-            # mlp_name = f'mlp_layer{i}'
             self.mlp_layer_list.append(
                 nn.Sequential(
                     nn.Linear(n_units, n_units),
@@ -32,9 +31,6 @@ class MLP(nn.Module):
                 ))
 
     def forward(self, x):
-        # print(x.dtype)
-        # x = x.double()
-        # print(x, x.dtype)
         x = self.mlp_layer1(x)
         for layer in self.mlp_layer_list:
             layer.to(self.device)
