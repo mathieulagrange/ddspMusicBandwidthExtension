@@ -21,8 +21,6 @@ generate_examples = False
 class args(Config):
     NAME = "debug"
     STEPS = 25000
-    BATCH = 16
-    DATASET = "synthetic"
     RETRAIN = False
 
 args.parse_args()
@@ -44,240 +42,60 @@ if 'max_sources' in config['model'].keys():
 else:
     max_sources = 5
 
-if config['preprocess']['downsampling_factor'] == 2:
-    if config['preprocess']['sampling_rate'] == 16000:
-        if 'ddsp' in config['train']['model']:
-            if args.DATASET == "synthetic":
-                dataset_train = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "synthetic_crepe":
-                dataset_train = Dataset(os.path.join(customPath.synthetic_crepe(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.synthetic_crepe(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "synthetic_poly":
-                dataset_train = Dataset(os.path.join(customPath.synthetic_poly(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.synthetic_poly(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "synthetic_poly_2":
-                dataset_train = Dataset(os.path.join(customPath.synthetic_poly_2(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.synthetic_poly_2(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "synthetic_poly_3":
-                dataset_train = Dataset(os.path.join(customPath.synthetic_poly_3(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.synthetic_poly_3(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "synthetic_poly_mono":
-                dataset_train = Dataset(os.path.join(customPath.synthetic_poly_mono(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.synthetic_poly_mono(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "synthetic_poly_mono_2":
-                dataset_train = Dataset(os.path.join(customPath.synthetic_poly_mono_2(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.synthetic_poly_mono_2(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
+if 'ddsp' in config['train']['model']:
+    if config['data']['dataset'] == "synthetic":
+        dataset_train = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
+        dataset_test = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
+    elif config['data']['dataset'] == "synthetic_poly":
+        dataset_train = Dataset(os.path.join(customPath.synthetic_poly(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
+        dataset_test = Dataset(os.path.join(customPath.synthetic_poly(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
+    elif config['data']['dataset'] == "sol":
+        dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
+        dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
+    elif config['data']['dataset'] == "medley":
+        dataset_train = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
+        dataset_test = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
+    elif config['data']['dataset'] == "gtzan":
+        dataset_train = Dataset(os.path.join(customPath.gtzan(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
+        dataset_test = Dataset(os.path.join(customPath.gtzan(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
+    elif config['data']['dataset'] == "medleyDB_mixtures":
+        dataset_train = Dataset(os.path.join(customPath.medleyDB_mixtures(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
+        dataset_test = Dataset(os.path.join(customPath.medleyDB_mixtures(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
 
-            elif args.DATASET == "sol":
-                dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "medley":
-                dataset_train = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "dsd_sources":
-                dataset_train = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "dsd_mixtures":
-                dataset_train = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "gtzan":
-                dataset_train = Dataset(os.path.join(customPath.gtzan(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.gtzan(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "medleyDB_stems":
-                dataset_train = Dataset(os.path.join(customPath.medleyDB_stems(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.medleyDB_stems(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "medleyDB_mixtures":
-                dataset_train = Dataset(os.path.join(customPath.medleyDB_mixtures(), 'preprocessed_ddsp/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.medleyDB_mixtures(), 'preprocessed_ddsp/test'), model=config['train']['model'], max_sources=max_sources)
+    if config['train']['model'] == 'ddsp':
+        model = DDSP(**config["model"]).to(device)
+    elif config['train']['model'] == 'ddsp_poly_decoder':
+        model = DDSPMulti(**config['model']).to(device)
+    elif config['train']['model'] == 'ddsp_non_harmo':
+        model = DDSPNonHarmonic(**config["model"]).to(device)
+    elif config['train']['model'] == 'ddsp_noise':
+        model = DDSPNoise(**config["model"]).to(device)
 
-            if config['train']['model'] == 'ddsp':
-                model = DDSP(**config["model"]).to(device)
-            elif config['train']['model'] == 'ddsp_decoder_multi':
-                model = DDSPMulti(**config['model']).to(device)
-            elif config['train']['model'] == 'ddsp_non_harmo':
-                model = DDSPNonHarmonic(**config["model"]).to(device)
-            elif config['train']['model'] == 'ddsp_noise':
-                model = DDSPNoise(**config["model"]).to(device)
+elif config['train']['model'] == 'resnet':
+    if config['data']['dataset'] == "synthetic":
+        dataset_train = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_resnet/train'), model=config['train']['model'])
+        dataset_test = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_resnet/test'), model=config['train']['model'])        
+    elif config['data']['dataset'] == "synthetic_poly":
+        dataset_train = Dataset(os.path.join(customPath.synthetic_poly(), 'preprocessed_resnet/train'), model=config['train']['model'])
+        dataset_test = Dataset(os.path.join(customPath.synthetic_poly(), 'preprocessed_resnet/test'), model=config['train']['model'])        
+    elif config['data']['dataset'] == "sol":
+        dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_resnet/train'), model=config['train']['model'])
+        dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_resnet/test'), model=config['train']['model'])
+    elif config['data']['dataset'] == "medley":
+        dataset_train = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/train'), model=config['train']['model'])
+        dataset_test = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/test'), model=config['train']['model'])
+    elif config['data']['dataset'] == "gtzan":
+        dataset_train = Dataset(os.path.join(customPath.gtzan(), 'preprocessed_resnet/train'), model=config['train']['model'])
+        dataset_test = Dataset(os.path.join(customPath.gtzan(), 'preprocessed_resnet/test'), model=config['train']['model'])
+    elif config['data']['dataset'] == "medleyDB_mixtures":
+        dataset_train = Dataset(os.path.join(customPath.medleyDB_mixtures(), 'preprocessed_resnet/train'), model=config['train']['model'])
+        dataset_test = Dataset(os.path.join(customPath.medleyDB_mixtures(), 'preprocessed_resnet/test'), model=config['train']['model'])
 
-        elif config['train']['model'] == 'resnet':
-            if args.DATASET == "synthetic":
-                dataset_train = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_resnet/test'), model=config['train']['model'])
-            elif args.DATASET == "synthetic_poly":
-                dataset_train = Dataset(os.path.join(customPath.synthetic_poly(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.synthetic_poly(), 'preprocessed_resnet/test'), model=config['train']['model'])        
-            elif args.DATASET == "sol":
-                dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/test'), model=config['train']['model'])
-            elif args.DATASET == "medley":
-                dataset_train = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/test'), model=config['train']['model'])
-            elif args.DATASET == "dsd_sources":
-                dataset_train = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/test'), model=config['train']['model'])
-            elif args.DATASET == "dsd_mixtures":
-                dataset_train = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet/test'), model=config['train']['model'])
-            elif args.DATASET == "gtzan":
-                dataset_train = Dataset(os.path.join(customPath.gtzan(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.gtzan(), 'preprocessed_resnet/test'), model=config['train']['model'])
-            elif args.DATASET == "medleyDB_stems":
-                dataset_train = Dataset(os.path.join(customPath.medleyDB_stems(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.medleyDB_stems(), 'preprocessed_resnet/test'), model=config['train']['model'])
-            elif args.DATASET == "medleyDB_mixtures":
-                dataset_train = Dataset(os.path.join(customPath.medleyDB_mixtures(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.medleyDB_mixtures(), 'preprocessed_resnet/test'), model=config['train']['model'])
-
-            model = Resnet().to(device)
-
-    elif config['preprocess']['sampling_rate'] == 8000:
-        if 'ddsp' in config['train']['model']:
-            if args.DATASET == "synthetic":
-                dataset_train = Dataset(os.path.join(customPath.synthetic(), '8000', 'preprocessed_ddsp/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.synthetic(), '8000', 'preprocessed_ddsp/test'), model=config['train']['model'])
-            elif args.DATASET == "synthetic_crepe":
-                dataset_train = Dataset(os.path.join(customPath.synthetic_crepe(), '8000', 'preprocessed_ddsp/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.synthetic_crepe(), '8000', 'preprocessed_ddsp/test'), model=config['train']['model'])
-            elif args.DATASET == "synthetic_poly":
-                dataset_train = Dataset(os.path.join(customPath.synthetic_poly(), '8000', 'preprocessed_ddsp/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.synthetic_poly(), '8000', 'preprocessed_ddsp/test'), model=config['train']['model'])
-            elif args.DATASET == "sol":
-                dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), '8000', 'preprocessed_ddsp/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), '8000', 'preprocessed_ddsp/test'), model=config['train']['model'])
-            elif args.DATASET == "medley":
-                dataset_train = Dataset(os.path.join(customPath.medleySolosDB(), '8000', 'preprocessed_ddsp/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.medleySolosDB(), '8000', 'preprocessed_ddsp/test'), model=config['train']['model'])
-            elif args.DATASET == "dsd_sources":
-                dataset_train = Dataset(os.path.join(customPath.dsd_sources(), '8000', 'preprocessed_ddsp/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.dsd_sources(), '8000', 'preprocessed_ddsp/test'), model=config['train']['model'])
-            elif args.DATASET == "dsd_mixtures":
-                dataset_train = Dataset(os.path.join(customPath.dsd_mixtures(), '8000', 'preprocessed_ddsp/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.dsd_mixtures(), '8000', 'preprocessed_ddsp/test'), model=config['train']['model'])
-            elif args.DATASET == "gtzan":
-                dataset_train = Dataset(os.path.join(customPath.gtzan(), '8000', 'preprocessed_ddsp/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.gtzan(), '8000', 'preprocessed_ddsp/test'), model=config['train']['model'])
-            elif args.DATASET == "medleyDB_stems":
-                dataset_train = Dataset(os.path.join(customPath.medleyDB_stems(), '8000', 'preprocessed_ddsp/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.medleyDB_stems(), '8000', 'preprocessed_ddsp/test'), model=config['train']['model'])
-            elif args.DATASET == "medleyDB_mixtures":
-                dataset_train = Dataset(os.path.join(customPath.medleyDB_mixtures(), '8000', 'preprocessed_ddsp/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.medleyDB_mixtures(), '8000', 'preprocessed_ddsp/test'), model=config['train']['model'])
-
-            if config['train']['model'] == 'ddsp':
-                model = DDSP(**config["model"]).to(device)
-            elif config['train']['model'] == 'ddsp_decoder_multi':
-                model = DDSPMulti(**config["model"]).to(device)
-            elif config['train']['model'] == 'ddsp_non_harmo':
-                model = DDSPNonHarmonic(**config["model"]).to(device)
-            elif config['train']['model'] == 'ddsp_noise':
-                model = DDSPNoise(**config["model"]).to(device)
-
-        elif config['train']['model'] == 'resnet':
-            if args.DATASET == "synthetic":
-                dataset_train = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_resnet/test'), model=config['train']['model'])
-            elif args.DATASET == "synthetic_poly":
-                dataset_train = Dataset(os.path.join(customPath.synthetic_poly(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.synthetic_poly(), 'preprocessed_resnet/test'), model=config['train']['model'])
-            elif args.DATASET == "sol":
-                dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp/test'), model=config['train']['model'])
-            elif args.DATASET == "medley":
-                dataset_train = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet/test'), model=config['train']['model'])
-            elif args.DATASET == "dsd_sources":
-                dataset_train = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_resnet/test'), model=config['train']['model'])
-            elif args.DATASET == "dsd_mixtures":
-                dataset_train = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet/test'), model=config['train']['model'])
-            elif args.DATASET == "gtzan":
-                dataset_train = Dataset(os.path.join(customPath.gtzan(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.gtzan(), 'preprocessed_resnet/test'), model=config['train']['model'])
-            elif args.DATASET == "medleyDB_stems":
-                dataset_train = Dataset(os.path.join(customPath.medleyDB_stems(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.medleyDB_stems(), 'preprocessed_resnet/test'), model=config['train']['model'])
-            elif args.DATASET == "medleyDB_mixtures":
-                dataset_train = Dataset(os.path.join(customPath.medleyDB_mixtures(), 'preprocessed_resnet/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.medleyDB_mixtures(), 'preprocessed_resnet/test'), model=config['train']['model'])
-
-            model = Resnet().to(device)
-
-if config['preprocess']['downsampling_factor'] == 4:
-    if config['preprocess']['sampling_rate'] == 16000:
-        if 'ddsp' in config['train']['model']:
-            if args.DATASET == "synthetic":
-                dataset_train = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_ddsp_4/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_ddsp_4/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "synthetic_poly":
-                dataset_train = Dataset(os.path.join(customPath.synthetic_poly(), 'preprocessed_ddsp_4/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.synthetic_poly(), 'preprocessed_ddsp_4/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "sol":
-                dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp_4/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_ddsp_4/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "medley":
-                dataset_train = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp_4/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_ddsp_4/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "dsd_sources":
-                dataset_train = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_ddsp_4/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_ddsp_4/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "dsd_mixtures":
-                dataset_train = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_ddsp_4/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_ddsp_4/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "gtzan":
-                dataset_train = Dataset(os.path.join(customPath.gtzan(), 'preprocessed_ddsp_4/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.gtzan(), 'preprocessed_ddsp_4/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "medleyDB_stems":
-                dataset_train = Dataset(os.path.join(customPath.medleyDB_stems(), 'preprocessed_ddsp_4/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.medleyDB_stems(), 'preprocessed_ddsp_4/test'), model=config['train']['model'], max_sources=max_sources)
-            elif args.DATASET == "medleyDB_mixtures":
-                dataset_train = Dataset(os.path.join(customPath.medleyDB_mixtures(), 'preprocessed_ddsp_4/train'), model=config['train']['model'], max_sources=max_sources)
-                dataset_test = Dataset(os.path.join(customPath.medleyDB_mixtures(), 'preprocessed_ddsp_4/test'), model=config['train']['model'], max_sources=max_sources)
-
-            if config['train']['model'] == 'ddsp':
-                model = DDSP(**config["model"]).to(device)
-            elif config['train']['model'] == 'ddsp_decoder_multi':
-                model = DDSPMulti(**config['model']).to(device)
-            elif config['train']['model'] == 'ddsp_non_harmo':
-                model = DDSPNonHarmonic(**config["model"]).to(device)
-            elif config['train']['model'] == 'ddsp_noise':
-                model = DDSPNoise(**config["model"]).to(device)
-
-        elif config['train']['model'] == 'resnet':
-            if args.DATASET == "synthetic":
-                dataset_train = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_resnet_4/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.synthetic(), 'preprocessed_resnet_4/test'), model=config['train']['model'])        
-            elif args.DATASET == "synthetic_poly":
-                dataset_train = Dataset(os.path.join(customPath.synthetic_poly(), 'preprocessed_resnet_4/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.synthetic_poly(), 'preprocessed_resnet_4/test'), model=config['train']['model'])        
-            elif args.DATASET == "sol":
-                dataset_train = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_resnet_4/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.orchideaSOL(), 'preprocessed_resnet_4/test'), model=config['train']['model'])
-            elif args.DATASET == "medley":
-                dataset_train = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet_4/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.medleySolosDB(), 'preprocessed_resnet_4/test'), model=config['train']['model'])
-            elif args.DATASET == "dsd_sources":
-                dataset_train = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_resnet_4/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.dsd_sources(), 'preprocessed_resnet_4/test'), model=config['train']['model'])
-            elif args.DATASET == "dsd_mixtures":
-                dataset_train = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet_4/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.dsd_mixtures(), 'preprocessed_resnet_4/test'), model=config['train']['model'])
-            elif args.DATASET == "gtzan":
-                dataset_train = Dataset(os.path.join(customPath.gtzan(), 'preprocessed_resnet_4/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.gtzan(), 'preprocessed_resnet_4/test'), model=config['train']['model'])
-            elif args.DATASET == "medleyDB_stems":
-                dataset_train = Dataset(os.path.join(customPath.medleyDB_stems(), 'preprocessed_resnet_4/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.medleyDB_stems(), 'preprocessed_resnet_4/test'), model=config['train']['model'])
-            elif args.DATASET == "medleyDB_mixtures":
-                dataset_train = Dataset(os.path.join(customPath.medleyDB_mixtures(), 'preprocessed_resnet_4/train'), model=config['train']['model'])
-                dataset_test = Dataset(os.path.join(customPath.medleyDB_mixtures(), 'preprocessed_resnet_4/test'), model=config['train']['model'])
-
-            model = Resnet().to(device)
+    model = Resnet().to(device)
 
 dataloader = torch.utils.data.DataLoader(
     dataset_train,
-    args.BATCH,
+    config['train']['batch'],
     True,
     drop_last=True,
 )
@@ -322,6 +140,7 @@ first_check_plateau = True
 for e in tqdm(range(epochs)):
     index_s = 0
     for i_batch, batch in enumerate(dataloader):
+        print(i_batch)
         if 'ddsp' in config['train']['model']:
             s_WB, s_LB, p, l = batch
             s_WB = s_WB.to(device)
@@ -330,7 +149,7 @@ for e in tqdm(range(epochs)):
             l = l.unsqueeze(-1).to(device)
             l = (l - mean_loudness) / std_loudness
 
-            if config['train']['model'] == 'ddsp_decoder_multi':
+            if config['train']['model'] == 'ddsp_poly_decoder':
                 n_sources = p.shape[1]
                 if n_sources < config['model']['max_sources']:
                         n_missing_sources = config['model']['max_sources']-n_sources
@@ -339,19 +158,12 @@ for e in tqdm(range(epochs)):
                 elif n_sources > config['model']['max_sources']:
                     p = p[:, :config['model']['max_sources'], ...]
             
-            if config['train']['model'] == 'ddsp_decoder_multi':
-                if config['data']['input'] == 'LB':
-                    y = model(s_LB, p, l, add_noise=True, n_sources=n_sources, reverb=False).squeeze(-1)
-                elif config['data']['input'] == 'WB':
-                    y = model(s_WB, p, l, n_sources=n_sources).squeeze(-1)
+            if config['train']['model'] == 'ddsp_poly_decoder':
+                y = model(s_LB, p, l, add_noise=True, n_sources=n_sources, reverb=False).squeeze(-1)
             elif config['train']['model'] == 'ddsp_noise':
-                if config['data']['input'] == 'LB':
-                    y = model(s_LB, l).squeeze(-1)
+                y = model(s_LB, l).squeeze(-1)
             else:
-                if config['data']['input'] == 'LB':
-                    y = model(s_LB, p, l, add_noise=True, reverb=False).squeeze(-1)
-                elif config['data']['input'] == 'WB':
-                    y = model(s_WB, p, l).squeeze(-1)
+                y = model(s_LB, p, l, add_noise=True, reverb=False).squeeze(-1)
 
             ori_stft = multiscale_fft(
                 s_WB,

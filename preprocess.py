@@ -74,7 +74,7 @@ class Dataset(torch.utils.data.Dataset):
             else:
                 self.mono_loudnesses = None
             
-            if model == 'ddsp_decoder_multi' and os.path.isfile(path.join(out_dir, "all_pitches.pkl")):
+            if model == 'ddsp_poly_decoder' and os.path.isfile(path.join(out_dir, "all_pitches.pkl")):
                 with open(path.join(out_dir, "all_pitches.pkl"), 'rb') as f:
                     self.all_pitches = pickle.load(f)
             else:
@@ -107,7 +107,7 @@ class Dataset(torch.utils.data.Dataset):
                 p = p.float()
             else:
                 p = torch.from_numpy(self.pitchs[idx])
-                if self.model == 'ddsp_decoder_multi':
+                if self.model == 'ddsp_poly_decoder':
                     p = p.unsqueeze(0)
             l = torch.from_numpy(self.loudness[idx])
             return s_WB, s_LB, p, l
@@ -186,15 +186,6 @@ def main():
         loudness = np.concatenate(loudness, 0).astype(np.float32)
         if len(mono_loudnesses) > 0:
             mono_loudnesses = np.stack(mono_loudnesses, 0).astype(np.float32)
-        # if len(all_pitches) > 0:
-        #     max_n_sources = max([p.shape[0] for p in all_pitches])
-        #     for i_pitch in range(len(all_pitches)):
-        #         p = all_pitches[i_pitch]
-        #         if p.shape[0] < max_n_sources:
-        #             p_zero_pad = np.zeros((max_n_sources-p.shape[0], p.shape[1]))
-        #             new_p = np.concatenate((p, p_zero_pad), axis=0)
-        #             all_pitches[i_pitch] = new_p
-        #     all_pitches = np.stack(all_pitches, 0).astype(np.float32)
 
     np.save(path.join(out_dir, "signals_WB.npy"), signals_WB)
     np.save(path.join(out_dir, "signals_LB.npy"), signals_LB)

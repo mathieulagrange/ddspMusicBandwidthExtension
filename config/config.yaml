@@ -2,12 +2,13 @@ data:
   dataset: gtzan
   extension: wav
   input: LB
-  mean_loudness: -8.291287868022911
-  std_loudness: 2.1910222426056887
+  mean_loudness: -11.504433484673505
+  std_loudness: 0.9554695709887904
 model:
   block_size: 256
   device: cpu
   hidden_size: 512
+  max_sources: 5
   n_bands: 65
   n_harmonics: 100
   sampling_rate: 16000
@@ -19,8 +20,8 @@ preprocess:
   signal_length: 64000
 train:
   HF: true
-  batch: 32
-  model: ddsp
+  batch: 2
+  model: ddsp_poly_decoder
   overlap: 0.75
   scales:
   - 2048
