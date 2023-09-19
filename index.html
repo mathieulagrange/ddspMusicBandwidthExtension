@@ -34,6 +34,123 @@ using a differentiable harmonic plus noise model</title>
     <h2>MUSHRA listening test samples</h2>
     <p>The following samples allow you to listen to the high frequency reconstruction of the different proposed models and baselines. The low-band input signal and ground-truth signals are given, as well as the output of the considered baseline models and DDSP-based models.
     </p>
+
+    <h3>Monophonic samples</h3>
+    <table class="table table-responsive">
+      <thead>
+      <tr class="text-center">
+          <td>Instrument</td>
+          <td>Input signal</td>
+          <td>Ground-truth signal</td>
+          <td>SBR</td>
+          <td>Resnet</td>
+          <td><b>DDSP-noise</b></td>
+          <td><b>DDSP-mono-dec</b></td>
+          <td><b>DDSP-mono-dec-cyclic</b></td>
+          <td><b>DDSP-poly-dec</b></td>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+          <td class="desc">Clarinet</td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-0_0e4371ac-1c6a-51ab-fdb7-f8abd5fbf1a3_LB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-0_0e4371ac-1c6a-51ab-fdb7-f8abd5fbf1a3_WB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-0_0e4371ac-1c6a-51ab-fdb7-f8abd5fbf1a3_sbr.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-0_0e4371ac-1c6a-51ab-fdb7-f8abd5fbf1a3_resnet.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-0_0e4371ac-1c6a-51ab-fdb7-f8abd5fbf1a3_ddsp_noise.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-0_0e4371ac-1c6a-51ab-fdb7-f8abd5fbf1a3_ddsp_mono.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-0_0e4371ac-1c6a-51ab-fdb7-f8abd5fbf1a3_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-0_0e4371ac-1c6a-51ab-fdb7-f8abd5fbf1a3_ddsp_poly.wav" type="audio/wav"></audio></td>
+      </tr>
+      
+      <tr>
+          <td class="desc">Distorted electric guitar</td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-1_4c793bdb-087f-5584-f918-4222077a867b_LB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-1_4c793bdb-087f-5584-f918-4222077a867b_WB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-1_4c793bdb-087f-5584-f918-4222077a867b_sbr.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-1_4c793bdb-087f-5584-f918-4222077a867b_resnet.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-1_4c793bdb-087f-5584-f918-4222077a867b_ddsp_noise.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-1_4c793bdb-087f-5584-f918-4222077a867b_ddsp_mono.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-1_4c793bdb-087f-5584-f918-4222077a867b_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-1_4c793bdb-087f-5584-f918-4222077a867b_ddsp_poly.wav" type="audio/wav"></audio></td>
+      </tr>
+      
+      <tr>
+          <td class="desc">Female singer</td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-2_5ccedf15-d898-55a9-f4be-728c1da20181_LB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-2_5ccedf15-d898-55a9-f4be-728c1da20181_WB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-2_5ccedf15-d898-55a9-f4be-728c1da20181_sbr.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-2_5ccedf15-d898-55a9-f4be-728c1da20181_resnet.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-2_5ccedf15-d898-55a9-f4be-728c1da20181_ddsp_noise.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-2_5ccedf15-d898-55a9-f4be-728c1da20181_ddsp_mono.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-2_5ccedf15-d898-55a9-f4be-728c1da20181_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-2_5ccedf15-d898-55a9-f4be-728c1da20181_ddsp_poly.wav" type="audio/wav"></audio></td>
+      </tr>
+      
+      <tr>
+          <td class="desc">Flute</td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-3_1f1dade7-bf95-59e1-f106-8a05e00c6048_LB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-3_1f1dade7-bf95-59e1-f106-8a05e00c6048_WB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-3_1f1dade7-bf95-59e1-f106-8a05e00c6048_sbr.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-3_1f1dade7-bf95-59e1-f106-8a05e00c6048_resnet.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-3_1f1dade7-bf95-59e1-f106-8a05e00c6048_ddsp_noise.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-3_1f1dade7-bf95-59e1-f106-8a05e00c6048_ddsp_mono.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-3_1f1dade7-bf95-59e1-f106-8a05e00c6048_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-3_1f1dade7-bf95-59e1-f106-8a05e00c6048_ddsp_poly.wav" type="audio/wav"></audio></td>
+      </tr>
+      
+      <tr>
+          <td class="desc">Piano</td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-4_4f682e0d-9336-5240-f285-c20d8efde9a5_LB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-4_4f682e0d-9336-5240-f285-c20d8efde9a5_WB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-4_4f682e0d-9336-5240-f285-c20d8efde9a5_sbr.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-4_4f682e0d-9336-5240-f285-c20d8efde9a5_resnet.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-4_4f682e0d-9336-5240-f285-c20d8efde9a5_ddsp_noise.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-4_4f682e0d-9336-5240-f285-c20d8efde9a5_ddsp_mono.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-4_4f682e0d-9336-5240-f285-c20d8efde9a5_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-4_4f682e0d-9336-5240-f285-c20d8efde9a5_ddsp_poly.wav" type="audio/wav"></audio></td>
+      </tr>
+      
+      <tr>
+          <td class="desc">Tenor saxophone</td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-5_c41bf890-ff1b-5bc2-fed4-38ba458e4533_LB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-5_c41bf890-ff1b-5bc2-fed4-38ba458e4533_WB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-5_c41bf890-ff1b-5bc2-fed4-38ba458e4533_sbr.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-5_c41bf890-ff1b-5bc2-fed4-38ba458e4533_resnet.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-5_c41bf890-ff1b-5bc2-fed4-38ba458e4533_ddsp_noise.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-5_c41bf890-ff1b-5bc2-fed4-38ba458e4533_ddsp_mono.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-5_c41bf890-ff1b-5bc2-fed4-38ba458e4533_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-5_c41bf890-ff1b-5bc2-fed4-38ba458e4533_ddsp_poly.wav" type="audio/wav"></audio></td>
+      </tr>
+      
+      <tr>
+          <td class="desc">Trumpet</td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-6_f1f4e8db-8291-5de5-ff28-33b11c4b43ba_LB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-6_f1f4e8db-8291-5de5-ff28-33b11c4b43ba_WB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-6_f1f4e8db-8291-5de5-ff28-33b11c4b43ba_sbr.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-6_f1f4e8db-8291-5de5-ff28-33b11c4b43ba_resnet.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-6_f1f4e8db-8291-5de5-ff28-33b11c4b43ba_ddsp_noise.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-6_f1f4e8db-8291-5de5-ff28-33b11c4b43ba_ddsp_mono.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-6_f1f4e8db-8291-5de5-ff28-33b11c4b43ba_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-6_f1f4e8db-8291-5de5-ff28-33b11c4b43ba_ddsp_poly.wav" type="audio/wav"></audio></td>
+      </tr>
+      
+      <tr>
+          <td class="desc">Violin</td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-7_1c3e613c-b151-5d8b-f958-71c6d04f7858_LB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-7_1c3e613c-b151-5d8b-f958-71c6d04f7858_WB.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-7_1c3e613c-b151-5d8b-f958-71c6d04f7858_sbr.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-7_1c3e613c-b151-5d8b-f958-71c6d04f7858_resnet.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-7_1c3e613c-b151-5d8b-f958-71c6d04f7858_ddsp_noise.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-7_1c3e613c-b151-5d8b-f958-71c6d04f7858_ddsp_mono.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-7_1c3e613c-b151-5d8b-f958-71c6d04f7858_ddsp_cyclic.wav" type="audio/wav"></audio></td>
+          <td class="text-center"><audio controls class="sample_audio"><source src="mushra/configs/resources/audio/medley/Medley-solos-DB_test-7_1c3e613c-b151-5d8b-f958-71c6d04f7858_ddsp_poly.wav" type="audio/wav"></audio></td>
+      </tr>
+      
+      </tbody>
+  </table>
+
+    <h3>Polyphonic samples</h3>
     <table class="table table-responsive">
         <thead>
         <tr class="text-center">
