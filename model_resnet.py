@@ -1,4 +1,5 @@
 import torch
+from ptflops import get_model_complexity_info
 
 def conv1d_same(in_channels, out_channels, kernel_size, bias=True, dilation=1):
     return torch.nn.Conv1d(in_channels, out_channels, kernel_size,
@@ -59,3 +60,18 @@ class Resnet(torch.nn.Module):
         x = self.model(x)
         x += input_
         return x
+    
+if __name__ == '__main__':
+
+    model = Resnet()
+    total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Number of parameters: {total_params}")
+
+    macs, params = get_model_complexity_info(model, (1, 512), as_strings=True,
+                                           print_per_layer_stat=True, verbose=True)
+    print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
+    print('{:<30}  {:<8}'.format('Number of parameters: ', params))
+
+    from fvcore.nn import FlopCountAnalysis
+    flops = FlopCountAnalysis(model, torch.zeros([1, 512], dtype=torch.float32))
+    print(flops.total())

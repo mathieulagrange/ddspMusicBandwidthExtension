@@ -4,6 +4,7 @@ import math
 import torchaudio
 from utils import scale_function, sigmoid_to_freqs
 import numpy as np
+from ptflops import get_model_complexity_info
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -33,7 +34,7 @@ class MLP(nn.Module):
     def forward(self, x):
         x = self.mlp_layer1(x)
         for layer in self.mlp_layer_list:
-            layer.to(self.device)
+            # layer.to(self.device)
             x = layer(x)
         return x
 
@@ -122,10 +123,12 @@ class Decoder(nn.Module):
 
         self.device = device
 
-    def forward(self, latent, f0, loudness):
+    def forward(self, latent = torch.zeros([1, 512], dtype=torch.float32), f0=torch.zeros([512, 1], dtype=torch.float32), loudness=torch.zeros([512, 1], dtype=torch.float32)):
+        latent = torch.zeros([512, 16], dtype=torch.float32)
+        latent.requires_grad = False
         if self.use_z:
             z = latent
-            self.mlp_z.to(self.device)
+            # self.mlp_z.to(self.device)
             latent_z = self.mlp_z(z)
 
         latent_f0 = self.mlp_f0(f0)
@@ -605,3 +608,36 @@ class TrainableFIRReverb(nn.Module):
         output_signal = torch.irfft(OUTPUT_SIGNAL, 1)
 
         return output_signal
+    
+if __name__ == '__main__':
+
+    model = Decoder()
+    total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Number of parameters: {total_params}")
+
+    # macs, params = get_model_complexity_info(model, (1, 512), as_strings=True,
+    #                                        print_per_layer_stat=True, verbose=True)
+    # print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
+    # print('{:<30}  {:<8}'.format('Number of parameters: ', params))
+
+    # from fvcore.nn import FlopCountAnalysis, flop_count_table
+    # flops = FlopCountAnalysis(model, torch.zeros([1, 1], dtype=torch.float32))
+    # print(flop_count_table(flops))
+
+    from deepspeed.profiling.flops_profiler import get_model_profile
+    from deepspeed.accelerator import get_accelerator
+
+    with get_accelerator().device(0):
+        batch_size = 256
+        flops, macs, params = get_model_profile(model=model, # model
+                                        input_shape=(1), # input shape to the model. If specified, the model takes a tensor with this shape as the only positional argument.
+                                        args=None, # list of positional arguments to the model.
+                                        kwargs=None, # dictionary of keyword arguments to the model.
+                                        print_profile=True, # prints the model graph with the measured profile attached to each module
+                                        detailed=True, # print the detailed profile
+                                        module_depth=-1, # depth into the nested modules, with -1 being the inner most modules
+                                        top_modules=1, # the number of top modules to print aggregated profile
+                                        warm_up=10, # the number of warm-ups before measuring the time of each module
+                                        as_string=True, # print raw numbers (e.g. 1000) or as human-readable strings (e.g. 1k)
+                                        output_file=None, # path to the output file. If None, the profiler prints to stdout.
+                                        ignore_modules=None) # the list of modules to ignore in the profiling
